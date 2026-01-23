@@ -44,3 +44,5 @@ app-example
 .vscode/keybindings.json
 
 .vscode/launch.json
+
+.vscode/tasks.json
