@@ -54,7 +54,6 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoComplete="email"
             error={email ? emailError : null}
-            placeholder="example@mail.com"
           />
           <TextField
             label="סיסמה"
@@ -64,7 +63,6 @@ export default function LoginScreen() {
             autoCapitalize="none"
             autoComplete="password"
             error={password ? passwordError : null}
-            placeholder="••••••••"
           />
           {error ? <AppText style={{ color: "red" }}>{error}</AppText> : null}
           <PrimaryButton

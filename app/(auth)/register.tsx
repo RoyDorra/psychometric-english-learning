@@ -17,13 +17,28 @@ export default function RegisterScreen() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const emailError = validateEmail(email);
-  const passwordError = password ? validatePassword(password) : "סיסמה חייבת להיות לפחות 8 תווים ולכלול אות ומספר";
-  const confirmError = confirm && confirm !== password ? "סיסמאות אינן תואמות" : null;
-  const isValid = !emailError && !passwordError && !confirmError;
+  const passwordError = password
+    ? validatePassword(password)
+    : "סיסמה חייבת להיות לפחות 8 תווים ולכלול אות ומספר";
+  const confirmError = !confirm
+    ? submitAttempted
+      ? "אנא אשרו סיסמה"
+      : null
+    : confirm !== password
+      ? "סיסמאות אינן תואמות"
+      : null;
+  const isValid =
+    !emailError &&
+    !passwordError &&
+    confirm.length > 0 &&
+    confirm === password;
 
   const handleRegister = async () => {
+    setSubmitAttempted(true);
+    if (!isValid) return;
     try {
       setLoading(true);
       setError(null);
@@ -55,7 +70,6 @@ export default function RegisterScreen() {
             keyboardType="email-address"
             autoComplete="email"
             error={email ? emailError : null}
-            placeholder="example@mail.com"
           />
           <TextField
             label="סיסמה"
@@ -65,7 +79,6 @@ export default function RegisterScreen() {
             autoCapitalize="none"
             autoComplete="password-new"
             error={password ? passwordError : null}
-            placeholder="••••••••"
           />
           <TextField
             label="אישור סיסמה"
@@ -73,8 +86,7 @@ export default function RegisterScreen() {
             onChangeText={setConfirm}
             secureTextEntry
             autoCapitalize="none"
-            error={confirm ? confirmError : null}
-            placeholder="••••••••"
+            error={confirmError}
           />
           {error ? <AppText style={{ color: "red" }}>{error}</AppText> : null}
           <PrimaryButton
