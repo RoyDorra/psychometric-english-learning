@@ -41,3 +41,8 @@ app-example
 # generated native folders
 /ios
 /android
+.vscode/keybindings.json
+
+.vscode/launch.json
+
+.vscode/tasks.json
