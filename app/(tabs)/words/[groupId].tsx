@@ -1,4 +1,5 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import AppText from "../../../components/AppText";
 import Screen from "../../../components/Screen";
@@ -8,11 +9,18 @@ import { spacing } from "../../../src/ui/theme";
 
 export default function GroupWordsScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { groupId } = useLocalSearchParams<{ groupId: string }>();
-  const { getWordsForGroup, statuses } = useWords();
+  const { getWordsForGroup, groups, statuses } = useWords();
 
   const id = Number(groupId);
   const words = getWordsForGroup(id);
+  const groupName =
+    groups.find((group) => String(group.id) === String(groupId))?.name ?? "קבוצת מילים";
+
+  useEffect(() => {
+    navigation.setOptions({ title: groupName });
+  }, [groupName, navigation]);
 
   return (
     <Screen withPadding>

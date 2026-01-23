@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import HeaderHelpButton from "../../components/HeaderHelpButton";
 import { colors } from "../../src/ui/theme";
 
 export default function TabsLayout() {
@@ -8,11 +7,10 @@ export default function TabsLayout() {
     <Tabs
       initialRouteName="index"
       screenOptions={{
-        headerTitleAlign: "center",
+        headerShown: false,
         tabBarStyle: { flexDirection: "row-reverse" },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: "#94a3b8",
-        headerRight: () => <HeaderHelpButton />,
       }}
     >
       <Tabs.Screen
