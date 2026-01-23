@@ -6,6 +6,7 @@ import EnglishText from "../../../components/EnglishText";
 import PrimaryButton from "../../../components/PrimaryButton";
 import Screen from "../../../components/Screen";
 import StatusSelector from "../../../components/StatusSelector";
+import { DEFAULT_REVIEW_STATUSES } from "../../../src/domain/status";
 import { WordStatus } from "../../../src/domain/types";
 import { useAssociations } from "../../../src/hooks/useAssociations";
 import { useReviewPlayer } from "../../../src/hooks/useReviewPlayer";
@@ -32,14 +33,18 @@ export default function ReviewPlayerScreen() {
   const [showTranslation, setShowTranslation] = useState(false);
   const { refresh } = useAssociations();
 
-  const filterGroups = parseGroups(params.groups);
-  const rawFilterStatuses = parseStatuses(params.statuses);
-  const filterStatuses = rawFilterStatuses.length ? rawFilterStatuses : ([
-    "UNMARKED",
-    "DONT_KNOW",
-    "PARTIAL",
-    "KNOW",
-  ] as WordStatus[]);
+  const filterGroups = useMemo(
+    () => parseGroups(params.groups),
+    [params.groups]
+  );
+  const rawFilterStatuses = useMemo(
+    () => parseStatuses(params.statuses),
+    [params.statuses]
+  );
+  const filterStatuses = useMemo(
+    () => (rawFilterStatuses.length ? rawFilterStatuses : DEFAULT_REVIEW_STATUSES),
+    [rawFilterStatuses]
+  );
 
   const targetGroups = useMemo(
     () => (filterGroups.length ? filterGroups : groups.map((g) => g.id)),
@@ -60,9 +65,15 @@ export default function ReviewPlayerScreen() {
     },
   });
 
+  const filterGroupsKey = useMemo(() => filterGroups.join(","), [filterGroups]);
+  const filterStatusesKey = useMemo(
+    () => filterStatuses.join(","),
+    [filterStatuses]
+  );
+
   useEffect(() => {
     resetIndex();
-  }, [filterGroups.join(","), filterStatuses.join(","), resetIndex]);
+  }, [filterGroupsKey, filterStatusesKey, resetIndex]);
 
   const panResponder = useMemo(
     () =>

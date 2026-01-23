@@ -1,14 +1,14 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import AppText from "../../../components/AppText";
-import EnglishText from "../../../components/EnglishText";
-import PrimaryButton from "../../../components/PrimaryButton";
-import Screen from "../../../components/Screen";
-import StatusSelector from "../../../components/StatusSelector";
-import { WordStatus } from "../../../src/domain/types";
-import { useWords } from "../../../src/hooks/useWords";
-import { colors, radius, spacing } from "../../../src/ui/theme";
+import AppText from "../../../../components/AppText";
+import EnglishText from "../../../../components/EnglishText";
+import PrimaryButton from "../../../../components/PrimaryButton";
+import Screen from "../../../../components/Screen";
+import StatusSelector from "../../../../components/StatusSelector";
+import { WordStatus } from "../../../../src/domain/types";
+import { useWords } from "../../../../src/hooks/useWords";
+import { colors, radius, spacing } from "../../../../src/ui/theme";
 
 function parseStatuses(raw?: string): WordStatus[] {
   if (!raw) return [];

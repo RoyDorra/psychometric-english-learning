@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import AppText from "../../../components/AppText";
 import Screen from "../../../components/Screen";
 import { useWords } from "../../../src/hooks/useWords";
@@ -18,7 +18,7 @@ export default function StudyHomeScreen() {
         contentContainerStyle={{ gap: spacing.m }}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => router.push(`/(tabs)/study/${item.id}.setup`)}
+            onPress={() => router.push(`/(tabs)/study/${item.id}/setup`)}
             style={styles.card}
           >
             <AppText style={styles.cardTitle}>{item.name}</AppText>

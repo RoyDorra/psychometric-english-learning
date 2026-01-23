@@ -1,12 +1,12 @@
-import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 import HeaderHelpButton from "../../components/HeaderHelpButton";
 import { colors } from "../../src/ui/theme";
 
 export default function TabsLayout() {
   return (
     <Tabs
-      initialRouteName="words"
+      initialRouteName="index"
       screenOptions={{
         headerTitleAlign: "center",
         tabBarStyle: { flexDirection: "row-reverse" },
@@ -15,6 +15,14 @@ export default function TabsLayout() {
         headerRight: () => <HeaderHelpButton />,
       }}
     >
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+          headerShown: false,
+          title: "",
+        }}
+      />
       <Tabs.Screen
         name="words"
         options={{

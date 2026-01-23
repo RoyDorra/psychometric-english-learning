@@ -4,14 +4,12 @@ import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import AppText from "../../../components/AppText";
 import PrimaryButton from "../../../components/PrimaryButton";
 import Screen from "../../../components/Screen";
-import { useAuth } from "../../../src/hooks/useAuth";
 import { useWords } from "../../../src/hooks/useWords";
 import { colors, radius, spacing } from "../../../src/ui/theme";
 
 export default function WordsHomeScreen() {
   const router = useRouter();
   const { groups, helpSeen, markHelpSeen, loading } = useWords();
-  const { logout } = useAuth();
 
   useEffect(() => {
     if (!loading && !helpSeen) {
@@ -24,9 +22,6 @@ export default function WordsHomeScreen() {
     <Screen withPadding>
       <View style={styles.headerRow}>
         <AppText style={styles.title}>קבוצות מילים</AppText>
-        <TouchableOpacity onPress={logout}>
-          <AppText style={styles.logout}>התנתקות</AppText>
-        </TouchableOpacity>
       </View>
       <FlatList
         data={groups}
@@ -56,10 +51,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: "700",
-  },
-  logout: {
-    color: colors.danger,
     fontWeight: "700",
   },
   card: {

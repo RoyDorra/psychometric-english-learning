@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import HeaderHelpButton from "../components/HeaderHelpButton";
 import { AuthProvider, useAuth } from "../src/hooks/useAuth";
 import { AssociationsProvider } from "../src/hooks/useAssociations";
 import { WordProvider } from "../src/hooks/useWords";
@@ -42,16 +41,12 @@ function RootLayoutNav() {
   return (
     <Stack
       screenOptions={{
-        headerTitleAlign: "center",
-        headerRight: () => <HeaderHelpButton />,
+        headerShown: false,
       }}
     >
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="help"
-        options={{ title: "איך ללמוד?", presentation: "modal" }}
-      />
+      <Stack.Screen name="help" options={{ headerShown: false, presentation: "modal" }} />
     </Stack>
   );
 }
