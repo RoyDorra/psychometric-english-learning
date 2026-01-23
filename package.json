@@ -1,6 +1,6 @@
 {
   "name": "psychometric-english-learning",
-  "main": "expo-router/entry",
+  "main": "./index.ts",
   "version": "1.0.0",
   "engines": {
     "node": "20.19.4",

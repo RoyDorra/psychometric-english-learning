@@ -1,5 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Word, WordStatus } from "../src/domain/types";
+import { rowDirection } from "../src/ui/rtl";
 import { colors, radius, spacing } from "../src/ui/theme";
 import AppText from "./AppText";
 import EnglishText from "./EnglishText";
@@ -35,7 +36,7 @@ export default function WordRow({ word, status, onPress }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     alignItems: "center",
     gap: spacing.m,
     backgroundColor: colors.surface,

@@ -7,6 +7,7 @@ import Screen from "../../components/Screen";
 import TextField from "../../components/TextField";
 import { useAuth } from "../../src/hooks/useAuth";
 import { validateEmail, validatePassword } from "../../src/services/validation";
+import { rowDirection, rtlTextBase } from "../../src/ui/rtl";
 import { spacing } from "../../src/ui/theme";
 
 export default function RegisterScreen() {
@@ -97,9 +98,12 @@ export default function RegisterScreen() {
           />
         </View>
 
-        <View style={{ flexDirection: "row", justifyContent: "center", gap: spacing.s }}>
+        <View style={{ flexDirection: rowDirection, justifyContent: "center", gap: spacing.s }}>
           <AppText>כבר רשומים?</AppText>
-          <Link href="/(auth)/login" style={{ color: "#2563eb", fontWeight: "700" }}>
+          <Link
+            href="/(auth)/login"
+            style={[rtlTextBase, { color: "#2563eb", fontWeight: "700" }]}
+          >
             חזרה להתחברות
           </Link>
         </View>

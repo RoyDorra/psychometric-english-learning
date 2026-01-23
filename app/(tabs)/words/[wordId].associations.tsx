@@ -2,11 +2,13 @@ import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import AppText from "../../../components/AppText";
+import EnglishText from "../../../components/EnglishText";
 import PrimaryButton from "../../../components/PrimaryButton";
 import Screen from "../../../components/Screen";
 import TextField from "../../../components/TextField";
 import { useAssociations } from "../../../src/hooks/useAssociations";
 import { useWords } from "../../../src/hooks/useWords";
+import { rowDirection } from "../../../src/ui/rtl";
 import { colors, radius, spacing } from "../../../src/ui/theme";
 
 export default function WordAssociationsScreen() {
@@ -31,7 +33,7 @@ export default function WordAssociationsScreen() {
       {word ? (
         <View style={styles.header}>
           <AppText style={styles.title}>אסוציאציות עבור</AppText>
-          <AppText style={styles.english}>{word.english}</AppText>
+          <EnglishText style={styles.english}>{word.english}</EnglishText>
         </View>
       ) : null}
 
@@ -113,7 +115,7 @@ const styles = StyleSheet.create({
     color: colors.muted,
   },
   listHeader: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: spacing.l,
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   association: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     gap: spacing.m,
     padding: spacing.m,
     backgroundColor: colors.surface,
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   metaRow: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     gap: spacing.s,
     alignItems: "center",
   },

@@ -8,6 +8,7 @@ import Screen from "../../../../components/Screen";
 import StatusSelector from "../../../../components/StatusSelector";
 import { WordStatus } from "../../../../src/domain/types";
 import { useWords } from "../../../../src/hooks/useWords";
+import { alignSelfStart, rowDirection } from "../../../../src/ui/rtl";
 import { colors, radius, spacing } from "../../../../src/ui/theme";
 
 function parseStatuses(raw?: string): WordStatus[] {
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
     color: colors.muted,
   },
   navRow: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     gap: spacing.s,
     marginBottom: spacing.m,
   },
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     color: colors.muted,
   },
   assocBtn: {
-    alignSelf: "flex-start",
+    alignSelf: alignSelfStart,
     paddingHorizontal: spacing.s,
     paddingVertical: 4,
     borderRadius: radius.s,

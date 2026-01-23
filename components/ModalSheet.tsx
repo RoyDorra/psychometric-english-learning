@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
 import { StyleSheet, View } from "react-native";
+import { rtlLayout } from "../src/ui/rtl";
 import { colors, radius, spacing } from "../src/ui/theme";
 
 type Props = PropsWithChildren<{
@@ -8,7 +9,7 @@ type Props = PropsWithChildren<{
 
 export default function ModalSheet({ children, elevated = true }: Props) {
   return (
-    <View style={[styles.container, elevated && styles.elevated]}>
+    <View style={[styles.container, rtlLayout, elevated && styles.elevated]}>
       {children}
     </View>
   );

@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
 import { StyleSheet, Text, TextProps } from "react-native";
+import { rtlTextBase } from "../src/ui/rtl";
 import { colors } from "../src/ui/theme";
 
 type Props = PropsWithChildren<TextProps>;
@@ -19,8 +20,7 @@ export default function AppText({ children, style, ...rest }: Props) {
 const styles = StyleSheet.create({
   text: {
     color: colors.text,
-    writingDirection: "rtl",
-    textAlign: "right",
+    ...rtlTextBase,
     fontSize: 16,
   },
 });

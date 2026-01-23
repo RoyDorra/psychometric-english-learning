@@ -7,6 +7,7 @@ import Screen from "../../components/Screen";
 import TextField from "../../components/TextField";
 import { useAuth } from "../../src/hooks/useAuth";
 import { validateEmail, validatePassword } from "../../src/services/validation";
+import { rowDirection, rtlTextBase } from "../../src/ui/rtl";
 import { spacing } from "../../src/ui/theme";
 
 export default function LoginScreen() {
@@ -73,9 +74,12 @@ export default function LoginScreen() {
           />
         </View>
 
-        <View style={{ flexDirection: "row", justifyContent: "center", gap: spacing.s }}>
+        <View style={{ flexDirection: rowDirection, justifyContent: "center", gap: spacing.s }}>
           <AppText>אין לכם משתמש?</AppText>
-          <Link href="/(auth)/register" style={{ color: "#2563eb", fontWeight: "700" }}>
+          <Link
+            href="/(auth)/register"
+            style={[rtlTextBase, { color: "#2563eb", fontWeight: "700" }]}
+          >
             להרשמה
           </Link>
         </View>

@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
 import { StyleSheet, Text, TextProps } from "react-native";
+import { ltrTextBase } from "../src/ui/rtl";
 import { colors } from "../src/ui/theme";
 
 type Props = PropsWithChildren<TextProps>;
@@ -23,8 +24,7 @@ export default function EnglishText({ children, style, ...rest }: Props) {
 const styles = StyleSheet.create({
   text: {
     color: colors.text,
-    writingDirection: "ltr",
-    textAlign: "left",
+    ...ltrTextBase,
     fontSize: 18,
     fontWeight: "600",
   },

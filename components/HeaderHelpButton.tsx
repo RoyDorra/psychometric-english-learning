@@ -11,6 +11,7 @@ import {
 import ModalSheet from "./ModalSheet";
 import { useAuth } from "../src/hooks/useAuth";
 import { clearAppStorage } from "../src/storage/clearAppStorage";
+import { alignSelfStart, rowDirection } from "../src/ui/rtl";
 import { colors, radius, spacing } from "../src/ui/theme";
 
 export default function HeaderHelpButton() {
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   actionsRow: {
-    flexDirection: "row-reverse",
+    flexDirection: rowDirection,
     justifyContent: "flex-start",
     gap: spacing.s,
   },
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
     writingDirection: "rtl",
   },
   closeBtn: {
-    alignSelf: "flex-start",
+    alignSelf: alignSelfStart,
     paddingHorizontal: spacing.s,
     paddingVertical: 6,
   },

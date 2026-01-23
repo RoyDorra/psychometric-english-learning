@@ -1,6 +1,7 @@
 import { PropsWithChildren } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView, StyleSheet, View } from "react-native";
+import { rtlLayout } from "../src/ui/rtl";
 import { colors, spacing } from "../src/ui/theme";
 
 type Props = PropsWithChildren<{
@@ -18,6 +19,7 @@ export default function Screen({
       style={[
         styles.body,
         withPadding && styles.padding,
+        rtlLayout,
       ]}
     >
       {children}
@@ -25,9 +27,14 @@ export default function Screen({
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+    <SafeAreaView style={[styles.container, rtlLayout]} edges={["top", "left", "right"]}>
       {scrollable ? (
-        <ScrollView contentContainerStyle={styles.scroll}>{content}</ScrollView>
+        <ScrollView
+          style={rtlLayout}
+          contentContainerStyle={[styles.scroll, rtlLayout]}
+        >
+          {content}
+        </ScrollView>
       ) : (
         content
       )}
@@ -42,7 +49,6 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
-    writingDirection: "rtl",
   },
   padding: {
     padding: spacing.l,

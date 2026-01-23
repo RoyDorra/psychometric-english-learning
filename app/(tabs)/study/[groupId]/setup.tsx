@@ -11,6 +11,7 @@ import {
 } from "../../../../src/domain/status";
 import { WordStatus } from "../../../../src/domain/types";
 import { useWords } from "../../../../src/hooks/useWords";
+import { rowDirection } from "../../../../src/ui/rtl";
 import { colors, radius, spacing } from "../../../../src/ui/theme";
 
 export default function StudySetupScreen() {
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   statusGrid: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     flexWrap: "wrap",
     gap: spacing.s,
   },

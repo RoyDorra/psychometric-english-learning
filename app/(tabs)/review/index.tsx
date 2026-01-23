@@ -10,6 +10,7 @@ import {
 } from "../../../src/domain/status";
 import { ReviewFilters, WordStatus } from "../../../src/domain/types";
 import { useWords } from "../../../src/hooks/useWords";
+import { rowDirection } from "../../../src/ui/rtl";
 import { colors, radius, spacing } from "../../../src/ui/theme";
 
 export default function ReviewFiltersScreen() {
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   grid: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     flexWrap: "wrap",
     gap: spacing.s,
   },

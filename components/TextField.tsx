@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { ltrTextBase, rowDirection, rtlTextBase } from "../src/ui/rtl";
 import { colors, radius, spacing } from "../src/ui/theme";
 import AppText from "./AppText";
 
@@ -14,23 +15,31 @@ type Props = {
   label: string;
   error?: string | null;
   secureTextEntry?: boolean;
+  textDirection?: "ltr" | "rtl";
 } & TextInputProps;
 
 export default function TextField({
   label,
   error,
   secureTextEntry,
+  textDirection = "rtl",
   ...rest
 }: Props) {
   const [hidden, setHidden] = useState(Boolean(secureTextEntry));
   const showToggle = secureTextEntry;
+  const directionStyles = textDirection === "rtl" ? rtlTextBase : ltrTextBase;
+
   return (
     <View style={styles.container}>
       <AppText style={styles.label}>{label}</AppText>
       <View style={styles.inputRow}>
         <TextInput
           {...rest}
-          style={[styles.input, showToggle && styles.inputWithToggle]}
+          style={[
+            styles.input,
+            showToggle && styles.inputWithToggle,
+            directionStyles,
+          ]}
           secureTextEntry={hidden}
           placeholderTextColor={colors.muted}
         />
@@ -56,7 +65,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   inputRow: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     alignItems: "center",
   },
   input: {
@@ -68,24 +77,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
     fontSize: 16,
-    writingDirection: "rtl",
-    textAlign: "right",
   },
   inputWithToggle: {
-    paddingRight: spacing.xl + spacing.s,
+    paddingStart: spacing.xl + spacing.s,
   },
   toggle: {
     position: "absolute",
-    left: spacing.s,
+    start: spacing.s,
     padding: spacing.s,
   },
   toggleText: {
     color: colors.primary,
     fontWeight: "700",
+    writingDirection: "rtl",
   },
   error: {
     color: colors.danger,
-    textAlign: "right",
     writingDirection: "rtl",
+    textAlign: "right",
   },
 });

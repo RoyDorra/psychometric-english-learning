@@ -6,7 +6,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "../src/hooks/useAuth";
 import { AssociationsProvider } from "../src/hooks/useAssociations";
 import { WordProvider } from "../src/hooks/useWords";
+import { ensureRTL, rtlLayout } from "../src/ui/rtl";
 import { colors } from "../src/ui/theme";
+
+ensureRTL();
 
 function RootLayoutNav() {
   const { session, initializing } = useAuth();
@@ -53,7 +56,7 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={[rtlLayout, { flex: 1 }]}>
       <SafeAreaProvider>
         <AuthProvider>
           <WordProvider>

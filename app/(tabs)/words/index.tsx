@@ -5,6 +5,7 @@ import AppText from "../../../components/AppText";
 import PrimaryButton from "../../../components/PrimaryButton";
 import Screen from "../../../components/Screen";
 import { useWords } from "../../../src/hooks/useWords";
+import { rowDirection } from "../../../src/ui/rtl";
 import { colors, radius, spacing } from "../../../src/ui/theme";
 
 export default function WordsHomeScreen() {
@@ -44,7 +45,7 @@ export default function WordsHomeScreen() {
 
 const styles = StyleSheet.create({
   headerRow: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: spacing.m,

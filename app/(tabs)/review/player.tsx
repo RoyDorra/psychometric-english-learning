@@ -11,6 +11,7 @@ import { WordStatus } from "../../../src/domain/types";
 import { useAssociations } from "../../../src/hooks/useAssociations";
 import { useReviewPlayer } from "../../../src/hooks/useReviewPlayer";
 import { useWords } from "../../../src/hooks/useWords";
+import { rowDirection } from "../../../src/ui/rtl";
 import { colors, radius, spacing } from "../../../src/ui/theme";
 
 function parseGroups(raw?: string) {
@@ -153,7 +154,7 @@ export default function ReviewPlayerScreen() {
 
 const styles = StyleSheet.create({
   topRow: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: spacing.m,
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
     color: colors.muted,
   },
   navRow: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     gap: spacing.s,
   },
 });

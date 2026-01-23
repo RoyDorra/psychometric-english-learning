@@ -5,6 +5,7 @@ import {
   getStatusLabel,
 } from "../src/domain/status";
 import { WordStatus } from "../src/domain/types";
+import { rowDirection } from "../src/ui/rtl";
 import { colors, radius, spacing } from "../src/ui/theme";
 
 type Props = {
@@ -42,7 +43,7 @@ export default function StatusSelector({ value, onChange, compact }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
+    flexDirection: rowDirection,
     gap: spacing.s,
     flexWrap: "wrap",
   },

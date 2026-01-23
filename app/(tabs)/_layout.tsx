@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { rowDirection } from "../../src/ui/rtl";
 import { colors } from "../../src/ui/theme";
 
 export default function TabsLayout() {
@@ -8,7 +9,8 @@ export default function TabsLayout() {
       initialRouteName="index"
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { flexDirection: "row-reverse" },
+        tabBarStyle: { flexDirection: rowDirection },
+        tabBarLabelStyle: { writingDirection: "rtl", textAlign: "center" },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: "#94a3b8",
       }}
