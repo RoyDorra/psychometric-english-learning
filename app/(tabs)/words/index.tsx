@@ -1,11 +1,12 @@
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
-import AppText from "../../../components/AppText";
-import PrimaryButton from "../../../components/PrimaryButton";
-import Screen from "../../../components/Screen";
-import { useWords } from "../../../src/hooks/useWords";
-import { colors, radius, spacing } from "../../../src/ui/theme";
+import AppText from "@/components/AppText";
+import PrimaryButton from "@/components/PrimaryButton";
+import Screen from "@/components/Screen";
+import { wordsGroup } from "@/src/navigation/routes";
+import { useWords } from "@/src/hooks/useWords";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function WordsHomeScreen() {
   const router = useRouter();
@@ -28,10 +29,7 @@ export default function WordsHomeScreen() {
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ gap: spacing.m }}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => router.push(`/(tabs)/words/${item.id}`)}
-            style={styles.card}
-          >
+          <TouchableOpacity onPress={() => router.push(wordsGroup(item.id))} style={styles.card}>
             <AppText style={styles.cardTitle}>{item.name}</AppText>
             <AppText style={styles.cardSubtitle}>כניסה לקבוצה</AppText>
           </TouchableOpacity>

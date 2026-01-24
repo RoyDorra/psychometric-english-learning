@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
-import HeaderHelpButton from "../../../components/HeaderHelpButton";
+import HeaderBackButton from "@/components/HeaderBackButton";
+import HeaderHelpButton from "@/components/HeaderHelpButton";
 
 export default function ReviewLayout() {
   return (
@@ -8,6 +9,7 @@ export default function ReviewLayout() {
         headerShown: true,
         headerTitleAlign: "center",
         headerBackButtonDisplayMode: "minimal",
+        headerLeft: () => <HeaderBackButton />,
         headerRight: () => <HeaderHelpButton />,
       }}
     >

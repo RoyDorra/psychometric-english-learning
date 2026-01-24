@@ -3,9 +3,9 @@ import {
   DEFAULT_REVIEW_STATUSES,
   getStatusColor,
   getStatusLabel,
-} from "../src/domain/status";
-import { WordStatus } from "../src/domain/types";
-import { colors, radius, spacing } from "../src/ui/theme";
+} from "@/src/domain/status";
+import { WordStatus } from "@/src/domain/types";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 type Props = {
   value: WordStatus;

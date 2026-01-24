@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
-import { getStatusColor, getStatusLabel } from "../src/domain/status";
-import { WordStatus } from "../src/domain/types";
-import { spacing, radius } from "../src/ui/theme";
+import { getStatusColor, getStatusLabel } from "@/src/domain/status";
+import { WordStatus } from "@/src/domain/types";
+import { spacing, radius } from "@/src/ui/theme";
 
 type Props = {
   status: WordStatus;

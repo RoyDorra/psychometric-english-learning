@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 import { StyleSheet, Text, TextProps } from "react-native";
-import { colors } from "../src/ui/theme";
+import { colors } from "@/src/ui/theme";
 
 type Props = PropsWithChildren<TextProps>;
 

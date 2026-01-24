@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 import { StyleSheet, View } from "react-native";
-import { colors, radius, spacing } from "../src/ui/theme";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 type Props = PropsWithChildren<{
   elevated?: boolean;

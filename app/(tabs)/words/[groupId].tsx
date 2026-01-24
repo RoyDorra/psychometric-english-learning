@@ -1,22 +1,23 @@
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
-import AppText from "../../../components/AppText";
-import Screen from "../../../components/Screen";
-import WordRow from "../../../components/WordRow";
-import { useWords } from "../../../src/hooks/useWords";
-import { spacing } from "../../../src/ui/theme";
+import AppText from "@/components/AppText";
+import Screen from "@/components/Screen";
+import WordRow from "@/components/WordRow";
+import { wordDetails } from "@/src/navigation/routes";
+import { useWords } from "@/src/hooks/useWords";
+import { spacing } from "@/src/ui/theme";
 
 export default function GroupWordsScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const { groupId } = useLocalSearchParams<{ groupId: string }>();
-  const { getWordsForGroup, groups, statuses } = useWords();
+  const { groupId } = useLocalSearchParams<{ groupId?: string | string[] }>();
+  const { getWordsForGroup, groups, statuses, updateStatus } = useWords();
 
-  const id = Number(groupId);
-  const words = getWordsForGroup(id);
-  const groupName =
-    groups.find((group) => String(group.id) === String(groupId))?.name ?? "קבוצת מילים";
+  const resolvedGroupId = Array.isArray(groupId) ? groupId[0] : groupId;
+  const group = groups.find((item) => item.id === resolvedGroupId);
+  const groupName = group?.name ?? "קבוצת מילים";
+  const words = resolvedGroupId ? getWordsForGroup(resolvedGroupId) : [];
 
   useEffect(() => {
     navigation.setOptions({ title: groupName });
@@ -25,7 +26,7 @@ export default function GroupWordsScreen() {
   return (
     <Screen withPadding>
       <View style={styles.header}>
-        <AppText style={styles.title}>קבוצה {id}</AppText>
+        <AppText style={styles.title}>{groupName}</AppText>
         <AppText style={styles.subtitle}>
           {words.length} מילים
         </AppText>
@@ -38,7 +39,8 @@ export default function GroupWordsScreen() {
           <WordRow
             word={item}
             status={statuses[item.id]}
-            onPress={() => router.push(`/(tabs)/words/${item.id}`)}
+            onPress={() => router.push(wordDetails(item.id))}
+            onStatusChange={(next) => updateStatus(item.id, next)}
           />
         )}
       />

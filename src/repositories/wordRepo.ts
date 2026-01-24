@@ -1,4 +1,4 @@
-import { DEMO_GROUPS, DEMO_WORDS } from "../data/words.demo";
+import { GROUPS, WORDS } from "../data/words";
 import { DEFAULT_STUDY_STATUSES, DEFAULT_REVIEW_STATUSES } from "../domain/status";
 import {
   Group,
@@ -23,19 +23,19 @@ function clone<T>(value: T): T {
 }
 
 export function getGroups(): Group[] {
-  return DEMO_GROUPS;
+  return GROUPS;
 }
 
 export function getWords(): Word[] {
-  return DEMO_WORDS;
+  return WORDS;
 }
 
-export function getWordsByGroup(groupId: number) {
-  return DEMO_WORDS.filter((word) => word.groupId === groupId);
+export function getWordsByGroup(groupId: string) {
+  return WORDS.filter((word) => word.groupId === groupId);
 }
 
 export function getWordById(wordId: string) {
-  return DEMO_WORDS.find((w) => w.id === wordId) ?? null;
+  return WORDS.find((w) => w.id === wordId) ?? null;
 }
 
 export async function getStatuses(email: string) {
@@ -92,7 +92,7 @@ export async function getReviewFilters(email: string) {
   const prefs = await getJson<ReviewState>(STORAGE_KEYS.REVIEW_PREFS, {});
   return (
     prefs[email] ?? {
-      groups: DEMO_GROUPS.map((g) => g.id),
+      groups: GROUPS.map((g) => g.id),
       statuses: DEFAULT_REVIEW_STATUSES,
     }
   );

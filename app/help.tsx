@@ -1,10 +1,10 @@
 import { useRouter } from "expo-router";
 import { View } from "react-native";
-import AppText from "../components/AppText";
-import PrimaryButton from "../components/PrimaryButton";
-import Screen from "../components/Screen";
-import { useWords } from "../src/hooks/useWords";
-import { spacing } from "../src/ui/theme";
+import AppText from "@/components/AppText";
+import PrimaryButton from "@/components/PrimaryButton";
+import Screen from "@/components/Screen";
+import { useWords } from "@/src/hooks/useWords";
+import { spacing } from "@/src/ui/theme";
 
 export default function HelpScreen() {
   const router = useRouter();

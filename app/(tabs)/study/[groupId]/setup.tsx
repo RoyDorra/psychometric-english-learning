@@ -1,17 +1,17 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
-import AppText from "../../../../components/AppText";
-import PrimaryButton from "../../../../components/PrimaryButton";
-import Screen from "../../../../components/Screen";
+import AppText from "@/components/AppText";
+import PrimaryButton from "@/components/PrimaryButton";
+import Screen from "@/components/Screen";
 import {
   DEFAULT_STUDY_STATUSES,
   STATUS_LABELS,
   STATUS_ORDER,
-} from "../../../../src/domain/status";
-import { WordStatus } from "../../../../src/domain/types";
-import { useWords } from "../../../../src/hooks/useWords";
-import { colors, radius, spacing } from "../../../../src/ui/theme";
+} from "@/src/domain/status";
+import { WordStatus } from "@/src/domain/types";
+import { useWords } from "@/src/hooks/useWords";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function StudySetupScreen() {
   const router = useRouter();

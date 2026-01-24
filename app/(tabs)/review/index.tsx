@@ -1,16 +1,16 @@
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import AppText from "../../../components/AppText";
-import PrimaryButton from "../../../components/PrimaryButton";
-import Screen from "../../../components/Screen";
+import AppText from "@/components/AppText";
+import PrimaryButton from "@/components/PrimaryButton";
+import Screen from "@/components/Screen";
 import {
   DEFAULT_REVIEW_STATUSES,
   STATUS_LABELS,
-} from "../../../src/domain/status";
-import { ReviewFilters, WordStatus } from "../../../src/domain/types";
-import { useWords } from "../../../src/hooks/useWords";
-import { colors, radius, spacing } from "../../../src/ui/theme";
+} from "@/src/domain/status";
+import { ReviewFilters, WordStatus } from "@/src/domain/types";
+import { useWords } from "@/src/hooks/useWords";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function ReviewFiltersScreen() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function ReviewFiltersScreen() {
     setLocalFilters(reviewFilters);
   }, [reviewFilters]);
 
-  const toggleGroup = (id: number) => {
+  const toggleGroup = (id: string) => {
     setLocalFilters((prev) => ({
       ...prev,
       groups: prev.groups.includes(id)
