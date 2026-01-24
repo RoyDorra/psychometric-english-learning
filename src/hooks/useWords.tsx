@@ -28,7 +28,7 @@ import { DEFAULT_REVIEW_STATUSES, DEFAULT_STUDY_STATUSES } from "../domain/statu
 type WordContextValue = {
   statuses: Record<string, WordStatus>;
   groups: Group[];
-  getWordsForGroup: (groupId: number) => Word[];
+  getWordsForGroup: (groupId: string) => Word[];
   getWord: (wordId: string) => Word | null;
   updateStatus: (wordId: string, status: WordStatus) => Promise<void>;
   studyPreferences: StudyPreferences;

@@ -1,12 +1,13 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import AppText from "../../../components/AppText";
-import EnglishText from "../../../components/EnglishText";
-import PrimaryButton from "../../../components/PrimaryButton";
-import Screen from "../../../components/Screen";
-import StatusSelector from "../../../components/StatusSelector";
-import { useWords } from "../../../src/hooks/useWords";
-import { radius, spacing } from "../../../src/ui/theme";
+import AppText from "@/components/AppText";
+import EnglishText from "@/components/EnglishText";
+import PrimaryButton from "@/components/PrimaryButton";
+import Screen from "@/components/Screen";
+import StatusSelector from "@/components/StatusSelector";
+import { wordAssociations } from "@/src/navigation/routes";
+import { useWords } from "@/src/hooks/useWords";
+import { radius, spacing } from "@/src/ui/theme";
 
 export default function WordDetailsScreen() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function WordDetailsScreen() {
 
       <PrimaryButton
         title="אסוציאציות"
-        onPress={() => router.push(`/(tabs)/words/${word.id}.associations`)}
+        onPress={() => router.push(wordAssociations(word.id))}
       />
     </Screen>
   );

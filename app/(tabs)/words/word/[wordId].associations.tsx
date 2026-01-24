@@ -1,13 +1,13 @@
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
-import AppText from "../../../components/AppText";
-import PrimaryButton from "../../../components/PrimaryButton";
-import Screen from "../../../components/Screen";
-import TextField from "../../../components/TextField";
-import { useAssociations } from "../../../src/hooks/useAssociations";
-import { useWords } from "../../../src/hooks/useWords";
-import { colors, radius, spacing } from "../../../src/ui/theme";
+import AppText from "@/components/AppText";
+import PrimaryButton from "@/components/PrimaryButton";
+import Screen from "@/components/Screen";
+import TextField from "@/components/TextField";
+import { useAssociations } from "@/src/hooks/useAssociations";
+import { useWords } from "@/src/hooks/useWords";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function WordAssociationsScreen() {
   const { wordId } = useLocalSearchParams<{ wordId: string }>();

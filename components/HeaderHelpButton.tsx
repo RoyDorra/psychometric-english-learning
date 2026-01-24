@@ -9,9 +9,9 @@ import {
   View,
 } from "react-native";
 import ModalSheet from "./ModalSheet";
-import { useAuth } from "../src/hooks/useAuth";
-import { clearAppStorage } from "../src/storage/clearAppStorage";
-import { colors, radius, spacing } from "../src/ui/theme";
+import { useAuth } from "@/src/hooks/useAuth";
+import { clearAppStorage } from "@/src/storage/clearAppStorage";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function HeaderHelpButton() {
   const router = useRouter();

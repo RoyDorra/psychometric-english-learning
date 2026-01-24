@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { colors, radius, spacing } from "../src/ui/theme";
+import { colors, radius, spacing } from "@/src/ui/theme";
 import AppText from "./AppText";
 
 type Props = {

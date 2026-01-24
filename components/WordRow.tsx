@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { Word, WordStatus } from "../src/domain/types";
-import { colors, radius, spacing } from "../src/ui/theme";
+import { Word, WordStatus } from "@/src/domain/types";
+import { colors, radius, spacing } from "@/src/ui/theme";
 import AppText from "./AppText";
 import EnglishText from "./EnglishText";
 

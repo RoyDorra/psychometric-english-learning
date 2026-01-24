@@ -1,13 +1,13 @@
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
-import AppText from "../../components/AppText";
-import PrimaryButton from "../../components/PrimaryButton";
-import Screen from "../../components/Screen";
-import TextField from "../../components/TextField";
-import { useAuth } from "../../src/hooks/useAuth";
-import { validateEmail, validatePassword } from "../../src/services/validation";
-import { spacing } from "../../src/ui/theme";
+import AppText from "@/components/AppText";
+import PrimaryButton from "@/components/PrimaryButton";
+import Screen from "@/components/Screen";
+import TextField from "@/components/TextField";
+import { useAuth } from "@/src/hooks/useAuth";
+import { validateEmail, validatePassword } from "@/src/services/validation";
+import { spacing } from "@/src/ui/theme";
 
 export default function RegisterScreen() {
   const router = useRouter();

@@ -2,14 +2,15 @@ export type WordStatus = "UNMARKED" | "DONT_KNOW" | "PARTIAL" | "KNOW";
 
 export type Word = {
   id: string;
-  groupId: number;
+  groupId: string;
   english: string;
   hebrewTranslations: string[];
 };
 
 export type Group = {
-  id: number;
+  id: string;
   name: string;
+  order: number;
 };
 
 export type AssociationSource = "remote" | "local";
@@ -41,7 +42,7 @@ export type StudyPreferences = {
 };
 
 export type ReviewFilters = {
-  groups: number[];
+  groups: string[];
   statuses: WordStatus[];
 };
 

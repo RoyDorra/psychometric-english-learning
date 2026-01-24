@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import HeaderHelpButton from "../../../components/HeaderHelpButton";
+import HeaderHelpButton from "@/components/HeaderHelpButton";
 
 export default function ReviewLayout() {
   return (

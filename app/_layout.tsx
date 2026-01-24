@@ -3,10 +3,10 @@ import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { AuthProvider, useAuth } from "../src/hooks/useAuth";
-import { AssociationsProvider } from "../src/hooks/useAssociations";
-import { WordProvider } from "../src/hooks/useWords";
-import { colors } from "../src/ui/theme";
+import { AuthProvider, useAuth } from "@/src/hooks/useAuth";
+import { AssociationsProvider } from "@/src/hooks/useAssociations";
+import { WordProvider } from "@/src/hooks/useWords";
+import { colors } from "@/src/ui/theme";
 
 function RootLayoutNav() {
   const { session, initializing } = useAuth();

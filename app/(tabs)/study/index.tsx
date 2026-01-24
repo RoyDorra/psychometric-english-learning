@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
 import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
-import AppText from "../../../components/AppText";
-import Screen from "../../../components/Screen";
-import { useWords } from "../../../src/hooks/useWords";
-import { colors, radius, spacing } from "../../../src/ui/theme";
+import AppText from "@/components/AppText";
+import Screen from "@/components/Screen";
+import { studySetup } from "@/src/navigation/routes";
+import { useWords } from "@/src/hooks/useWords";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function StudyHomeScreen() {
   const router = useRouter();
@@ -17,10 +18,7 @@ export default function StudyHomeScreen() {
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ gap: spacing.m }}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => router.push(`/(tabs)/study/${item.id}/setup`)}
-            style={styles.card}
-          >
+          <TouchableOpacity onPress={() => router.push(studySetup(item.id))} style={styles.card}>
             <AppText style={styles.cardTitle}>{item.name}</AppText>
             <AppText style={styles.cardSubtitle}>קבעו גודל מקבץ וסינון</AppText>
           </TouchableOpacity>

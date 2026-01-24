@@ -1,14 +1,15 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import AppText from "../../../../components/AppText";
-import EnglishText from "../../../../components/EnglishText";
-import PrimaryButton from "../../../../components/PrimaryButton";
-import Screen from "../../../../components/Screen";
-import StatusSelector from "../../../../components/StatusSelector";
-import { WordStatus } from "../../../../src/domain/types";
-import { useWords } from "../../../../src/hooks/useWords";
-import { colors, radius, spacing } from "../../../../src/ui/theme";
+import AppText from "@/components/AppText";
+import EnglishText from "@/components/EnglishText";
+import PrimaryButton from "@/components/PrimaryButton";
+import Screen from "@/components/Screen";
+import StatusSelector from "@/components/StatusSelector";
+import { WordStatus } from "@/src/domain/types";
+import { wordAssociations } from "@/src/navigation/routes";
+import { useWords } from "@/src/hooks/useWords";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 function parseStatuses(raw?: string): WordStatus[] {
   if (!raw) return [];
@@ -18,12 +19,14 @@ function parseStatuses(raw?: string): WordStatus[] {
 export default function StudyPagerScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ groupId: string; chunkSize?: string; statuses?: string }>();
-  const groupId = Number(params.groupId);
+  const groupId = Array.isArray(params.groupId) ? params.groupId[0] : params.groupId;
   const chunkSize = Math.max(1, Number(params.chunkSize) || 7);
   const selectedStatuses = parseStatuses(params.statuses);
-  const { getWordsForGroup, statuses, updateStatus } = useWords();
+  const { getWordsForGroup, statuses, updateStatus, groups } = useWords();
+  const groupName = groups.find((item) => item.id === groupId)?.name ?? "קבוצה";
 
   const filteredWords = useMemo(() => {
+    if (!groupId) return [];
     const list = getWordsForGroup(groupId);
     if (!selectedStatuses.length) return list;
     return list.filter((word) =>
@@ -48,7 +51,7 @@ export default function StudyPagerScreen() {
   return (
     <Screen withPadding>
       <View style={styles.header}>
-        <AppText style={styles.title}>קבוצה {groupId}</AppText>
+        <AppText style={styles.title}>{groupName}</AppText>
         <AppText style={styles.subtitle}>
           עמוד {chunks.length ? page + 1 : 0} מתוך {chunks.length}
         </AppText>
@@ -84,7 +87,7 @@ export default function StudyPagerScreen() {
                 />
                 <TouchableOpacity
                   style={styles.assocBtn}
-                  onPress={() => router.push(`/(tabs)/words/${word.id}.associations`)}
+                  onPress={() => router.push(wordAssociations(word.id))}
                 >
                   <AppText style={styles.assocText}>אסוציאציות</AppText>
                 </TouchableOpacity>

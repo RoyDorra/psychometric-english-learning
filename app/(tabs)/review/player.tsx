@@ -1,24 +1,22 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { PanResponder, StyleSheet, TouchableOpacity, View } from "react-native";
-import AppText from "../../../components/AppText";
-import EnglishText from "../../../components/EnglishText";
-import PrimaryButton from "../../../components/PrimaryButton";
-import Screen from "../../../components/Screen";
-import StatusSelector from "../../../components/StatusSelector";
-import { DEFAULT_REVIEW_STATUSES } from "../../../src/domain/status";
-import { WordStatus } from "../../../src/domain/types";
-import { useAssociations } from "../../../src/hooks/useAssociations";
-import { useReviewPlayer } from "../../../src/hooks/useReviewPlayer";
-import { useWords } from "../../../src/hooks/useWords";
-import { colors, radius, spacing } from "../../../src/ui/theme";
+import AppText from "@/components/AppText";
+import EnglishText from "@/components/EnglishText";
+import PrimaryButton from "@/components/PrimaryButton";
+import Screen from "@/components/Screen";
+import StatusSelector from "@/components/StatusSelector";
+import { DEFAULT_REVIEW_STATUSES } from "@/src/domain/status";
+import { WordStatus } from "@/src/domain/types";
+import { useAssociations } from "@/src/hooks/useAssociations";
+import { useReviewPlayer } from "@/src/hooks/useReviewPlayer";
+import { useWords } from "@/src/hooks/useWords";
+import { wordAssociations } from "@/src/navigation/routes";
+import { colors, radius, spacing } from "@/src/ui/theme";
 
 function parseGroups(raw?: string) {
   if (!raw) return [];
-  return raw
-    .split(",")
-    .map((g) => Number(g))
-    .filter(Boolean);
+  return raw.split(",").map((g) => g.trim()).filter(Boolean);
 }
 
 function parseStatuses(raw?: string): WordStatus[] {
@@ -142,7 +140,7 @@ export default function ReviewPlayerScreen() {
             title="אסוציאציות"
             onPress={() => {
               refresh();
-              router.push(`/(tabs)/words/${current.id}.associations`);
+              router.push(wordAssociations(current.id));
             }}
           />
         </View>
