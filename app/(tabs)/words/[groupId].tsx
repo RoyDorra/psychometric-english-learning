@@ -12,7 +12,7 @@ export default function GroupWordsScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const { groupId } = useLocalSearchParams<{ groupId?: string | string[] }>();
-  const { getWordsForGroup, groups, statuses } = useWords();
+  const { getWordsForGroup, groups, statuses, updateStatus } = useWords();
 
   const resolvedGroupId = Array.isArray(groupId) ? groupId[0] : groupId;
   const group = groups.find((item) => item.id === resolvedGroupId);
@@ -40,6 +40,7 @@ export default function GroupWordsScreen() {
             word={item}
             status={statuses[item.id]}
             onPress={() => router.push(wordDetails(item.id))}
+            onStatusChange={(next) => updateStatus(item.id, next)}
           />
         )}
       />

@@ -1,5 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Word, WordStatus } from "@/src/domain/types";
+import { getStatusColor } from "@/src/domain/status";
 import { colors, radius, spacing } from "@/src/ui/theme";
 import AppText from "./AppText";
 import EnglishText from "./EnglishText";
@@ -8,26 +9,47 @@ type Props = {
   word: Word;
   status?: WordStatus;
   onPress: () => void;
+  onStatusChange: (status: WordStatus) => void;
 };
 
-export default function WordRow({ word, status, onPress }: Props) {
-  const indicatorColor = status
-    ? {
-        UNMARKED: "#9ca3af",
-        DONT_KNOW: "#ef4444",
-        PARTIAL: "#facc15",
-        KNOW: "#22c55e",
-      }[status]
-    : colors.border;
+const STATUS_BUTTONS: WordStatus[] = ["DONT_KNOW", "PARTIAL", "KNOW"];
+
+export default function WordRow({
+  word,
+  status,
+  onPress,
+  onStatusChange,
+}: Props) {
+  const currentStatus = status ?? "UNMARKED";
+  const indicatorColor = getStatusColor(currentStatus);
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <View style={[styles.indicator, { backgroundColor: indicatorColor }]} />
-      <View style={styles.texts}>
+      <View style={styles.content}>
         <EnglishText style={styles.english}>{word.english}</EnglishText>
         <AppText style={styles.hebrew}>
           {word.hebrewTranslations.join(" / ")}
         </AppText>
+        <View style={styles.statusButtonsRow}>
+          {STATUS_BUTTONS.map((value) => {
+            const active = currentStatus === value;
+            const activeColor =
+              value === "PARTIAL" ? "#f59e0b" : getStatusColor(value);
+            return (
+              <TouchableOpacity
+                key={value}
+                onPress={() => onStatusChange(active ? "UNMARKED" : value)}
+                hitSlop={8}
+                style={[
+                  styles.statusButton,
+                  { backgroundColor: active ? activeColor : getStatusColor(value) },
+                  active ? styles.statusButtonActive : styles.statusButtonInactive,
+                ]}
+              />
+            );
+          })}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -36,7 +58,7 @@ export default function WordRow({ word, status, onPress }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "stretch",
     gap: spacing.m,
     backgroundColor: colors.surface,
     borderRadius: radius.m,
@@ -49,7 +71,7 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: radius.s,
   },
-  texts: {
+  content: {
     flex: 1,
     gap: spacing.xs,
   },
@@ -59,5 +81,23 @@ const styles = StyleSheet.create({
   },
   hebrew: {
     color: colors.muted,
+  },
+  statusButtonsRow: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    gap: spacing.xs,
+  },
+  statusButton: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  statusButtonInactive: {
+    opacity: 0.25,
+    borderColor: colors.border,
+  },
+  statusButtonActive: {
+    opacity: 1,
   },
 });
