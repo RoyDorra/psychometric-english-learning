@@ -6,6 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "@/src/hooks/useAuth";
 import { AssociationsProvider } from "@/src/hooks/useAssociations";
 import { WordProvider } from "@/src/hooks/useWords";
+import HeaderHelpButton from "@/components/HeaderHelpButton";
 import { colors } from "@/src/ui/theme";
 
 function RootLayoutNav() {
@@ -47,6 +48,26 @@ function RootLayoutNav() {
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="help" options={{ headerShown: false, presentation: "modal" }} />
+      <Stack.Screen
+        name="word/[wordId]"
+        options={{
+          title: "מילה",
+          headerShown: true,
+          headerTitleAlign: "center",
+          headerBackButtonDisplayMode: "minimal",
+          headerRight: () => <HeaderHelpButton />,
+        }}
+      />
+      <Stack.Screen
+        name="word/[wordId]/associations"
+        options={{
+          title: "אסוציאציות",
+          headerShown: true,
+          headerTitleAlign: "center",
+          headerBackButtonDisplayMode: "minimal",
+          headerRight: () => <HeaderHelpButton />,
+        }}
+      />
     </Stack>
   );
 }
