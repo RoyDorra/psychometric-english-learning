@@ -1,4 +1,4 @@
-[
+export default [
   ["abroad", "חו&quot;ל"],
   ["accomplices", "שותף לדבר עבירה"],
   ["acquitted", "זוכה מאשמה"],
@@ -430,4 +430,4 @@
   ["witness", "עד, להעיד"],
   ["worry", "דאגה, לדאוג"],
   ["zoo", "גן חיות"]
-]
+] as const;

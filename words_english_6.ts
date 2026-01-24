@@ -1,4 +1,4 @@
-[
+export default [
   ["absurd", "מגוחך, לא סביר"],
   ["accelerate", "להאיץ"],
   ["acclaim", "להריע, לשבח"],
@@ -428,4 +428,4 @@
   ["weight", "משקל"],
   ["wickedly", "ברשעות"],
   ["wisdom", "חכמה, בינה"]
-]
+] as const;

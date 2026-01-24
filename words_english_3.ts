@@ -1,4 +1,4 @@
-[
+export default [
   ["abrupt", "פתאומי"],
   ["absolute", "מוחלט"],
   ["accessible", "נגיש, זמין"],
@@ -429,4 +429,4 @@
   ["wild", "פראי, טבע"],
   ["wilderness", "ערבה, שממה"],
   ["wool", "צמר"]
-]
+] as const;

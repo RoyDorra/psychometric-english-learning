@@ -1,4 +1,4 @@
-[
+export default [
   ["abstain", "להתנזר, להימנע ממשהו"],
   ["accentuate", "להבליט, להדגיש"],
   ["accusation", "האשמה"],
@@ -431,4 +431,4 @@
   ["wind", "רוח"],
   ["wing", "כנף"],
   ["withstand", "להתמודד, לעמוד ב-"]
-]
+] as const;
