@@ -1,7 +1,7 @@
 import type { Href } from "expo-router";
 
 const WORDS_BASE = "/(tabs)/words";
-const WORD_BASE = "/(tabs)/words/word";
+const WORD_BASE = "/word";
 const STUDY_BASE = "/(tabs)/study";
 const REVIEW_BASE = "/(tabs)/review";
 

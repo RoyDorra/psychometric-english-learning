@@ -6,6 +6,7 @@ export default function TabsLayout() {
   return (
     <Tabs
       initialRouteName="index"
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
         tabBarStyle: { flexDirection: "row-reverse" },
