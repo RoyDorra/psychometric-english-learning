@@ -80,6 +80,21 @@ export async function voteAssociation(
   return state[wordId];
 }
 
+export async function removeLocalAssociation(wordId: string, associationId: string) {
+  const state = await getState();
+  const existing = state[wordId] ?? [];
+  const filtered = existing.filter(
+    (association) =>
+      association.id !== associationId || association.source !== "local"
+  );
+  if (filtered.length === existing.length) {
+    return existing;
+  }
+  state[wordId] = sortAssociations(filtered);
+  await saveState(state);
+  return state[wordId];
+}
+
 export async function getAssociationIndex() {
   return getState();
 }

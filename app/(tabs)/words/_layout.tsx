@@ -15,11 +15,11 @@ export default function WordsLayout() {
     >
       <Stack.Screen name="index" options={{ title: "מילים" }} />
       <Stack.Screen name="[groupId]" options={{ title: "קבוצת מילים" }} />
-      <Stack.Screen name="word/[wordId]" options={{ title: "מילה" }} />
       <Stack.Screen
-        name="word/[wordId].associations"
+        name="word/[wordId]/associations"
         options={{ title: "אסוציאציות" }}
       />
+      <Stack.Screen name="word/[wordId]" options={{ title: "מילה" }} />
     </Stack>
   );
 }

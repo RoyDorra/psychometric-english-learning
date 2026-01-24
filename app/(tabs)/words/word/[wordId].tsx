@@ -11,7 +11,8 @@ import { radius, spacing } from "@/src/ui/theme";
 
 export default function WordDetailsScreen() {
   const router = useRouter();
-  const { wordId } = useLocalSearchParams<{ wordId: string }>();
+  const params = useLocalSearchParams<{ wordId?: string | string[] }>();
+  const wordId = Array.isArray(params.wordId) ? params.wordId[0] : params.wordId;
   const { getWord, statuses, updateStatus } = useWords();
 
   const word = wordId ? getWord(wordId) : null;

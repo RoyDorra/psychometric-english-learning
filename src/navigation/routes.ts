@@ -30,5 +30,5 @@ export function wordDetails(wordId: string | number): Href {
 }
 
 export function wordAssociations(wordId: string | number): Href {
-  return `${wordDetails(wordId)}.associations` as Href;
+  return `${WORD_BASE}/${wordId}/associations` as Href;
 }

@@ -22,11 +22,15 @@ export default function HeaderBackButton() {
   const { getWord } = useWords();
 
   const wordIdFromPath =
-    pathname.match(/^\/words\/word\/([^/]+?)(?:\.associations)?$/)?.[1] ?? null;
+    pathname.match(/^\/words\/word\/([^/]+)\/associations$/)?.[1] ??
+    pathname.match(/^\/words\/word\/([^/]+)$/)?.[1] ??
+    null;
   const studyGroupIdFromPath =
     pathname.match(/^\/study\/([^/]+)\/(?:setup|pager)$/)?.[1] ?? null;
   const wordsGroupIdFromPath =
-    pathname.match(/^\/words\/([^/]+)$/)?.[1] ?? null;
+    pathname.startsWith("/words/word/")
+      ? null
+      : pathname.match(/^\/words\/([^/]+)$/)?.[1] ?? null;
 
   const resolvedWordId =
     (Array.isArray(params.wordId) ? params.wordId[0] : params.wordId) ??
@@ -42,7 +46,7 @@ export default function HeaderBackButton() {
   let target = null;
 
   if (pathname.startsWith("/words/word/")) {
-    if (pathname.endsWith(".associations")) {
+    if (pathname.endsWith("/associations")) {
       target = resolvedWordId ? wordDetails(resolvedWordId) : wordsIndex();
     } else {
       target = word?.groupId ? wordsGroup(word.groupId) : wordsIndex();

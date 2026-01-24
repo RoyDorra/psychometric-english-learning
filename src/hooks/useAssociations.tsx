@@ -10,6 +10,7 @@ import {
 import {
   addLocalAssociation,
   getAssociationIndex,
+  removeLocalAssociation,
   voteAssociation,
 } from "../repositories/associationRepo";
 import { Association } from "../domain/types";
@@ -21,6 +22,7 @@ type AssociationsContextValue = {
   refresh: () => Promise<void>;
   add: (wordId: string, text: string) => Promise<Association[]>;
   vote: (wordId: string, associationId: string, delta: 1 | -1) => Promise<Association[]>;
+  remove: (wordId: string, associationId: string) => Promise<Association[]>;
   syncing: boolean;
 };
 
@@ -65,15 +67,22 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
     return list;
   }, []);
 
+  const remove = useCallback(async (wordId: string, associationId: string) => {
+    const list = await removeLocalAssociation(wordId, associationId);
+    setAssociations((prev) => ({ ...prev, [wordId]: list }));
+    return list;
+  }, []);
+
   const value = useMemo(
     () => ({
       associations,
       refresh,
       add,
       vote,
+      remove,
       syncing,
     }),
-    [associations, syncing, refresh, add, vote]
+    [associations, syncing, refresh, add, vote, remove]
   );
 
   return (
