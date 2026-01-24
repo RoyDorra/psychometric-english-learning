@@ -10,6 +10,8 @@ import {
 import {
   addLocalAssociation,
   getAssociationIndex,
+  getUserAssociationVotes,
+  removeAssociationVote,
   removeLocalAssociation,
   voteAssociation,
 } from "../repositories/associationRepo";
@@ -19,10 +21,13 @@ import { useAuth } from "./useAuth";
 
 type AssociationsContextValue = {
   associations: Record<string, Association[]>;
+  votes: Record<string, 1 | -1>;
   refresh: () => Promise<void>;
   add: (wordId: string, text: string) => Promise<Association[]>;
   vote: (wordId: string, associationId: string, delta: 1 | -1) => Promise<Association[]>;
+  unvote: (wordId: string, associationId: string) => Promise<Association[]>;
   remove: (wordId: string, associationId: string) => Promise<Association[]>;
+  hasVoted: (associationId: string) => boolean;
   syncing: boolean;
 };
 
@@ -31,23 +36,32 @@ const AssociationsContext = createContext<AssociationsContextValue | undefined>(
 export function AssociationsProvider({ children }: PropsWithChildren) {
   const { session } = useAuth();
   const [associations, setAssociations] = useState<Record<string, Association[]>>({});
+  const [votes, setVotes] = useState<Record<string, 1 | -1>>({});
   const [syncing, setSyncing] = useState(false);
+  const voterId = session?.email ?? "guest";
 
   const load = useCallback(async () => {
     const map = await getAssociationIndex();
     setAssociations(map);
   }, []);
 
+  const loadVotes = useCallback(async () => {
+    const map = await getUserAssociationVotes(voterId);
+    setVotes(map);
+  }, [voterId]);
+
   const refresh = useCallback(async () => {
     setSyncing(true);
     await syncAssociationsIfPossible();
     await load();
+    await loadVotes();
     setSyncing(false);
-  }, [load]);
+  }, [load, loadVotes]);
 
   useEffect(() => {
     load();
-  }, [load]);
+    loadVotes();
+  }, [load, loadVotes]);
 
   useEffect(() => {
     if (session) {
@@ -62,10 +76,27 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
   }, []);
 
   const vote = useCallback(async (wordId: string, associationId: string, delta: 1 | -1) => {
-    const list = await voteAssociation(wordId, associationId, delta);
+    if (votes[associationId]) {
+      return associations[wordId] ?? [];
+    }
+    const list = await voteAssociation(wordId, associationId, delta, voterId);
     setAssociations((prev) => ({ ...prev, [wordId]: list }));
+    setVotes((prev) => ({ ...prev, [associationId]: delta }));
     return list;
-  }, []);
+  }, [associations, votes, voterId]);
+
+  const unvote = useCallback(async (wordId: string, associationId: string) => {
+    if (!votes[associationId]) {
+      return associations[wordId] ?? [];
+    }
+    const list = await removeAssociationVote(wordId, associationId, voterId);
+    setAssociations((prev) => ({ ...prev, [wordId]: list }));
+    setVotes((prev) => {
+      const { [associationId]: _, ...rest } = prev;
+      return rest;
+    });
+    return list;
+  }, [associations, votes, voterId]);
 
   const remove = useCallback(async (wordId: string, associationId: string) => {
     const list = await removeLocalAssociation(wordId, associationId);
@@ -73,16 +104,24 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
     return list;
   }, []);
 
+  const hasVoted = useCallback(
+    (associationId: string) => Boolean(votes[associationId]),
+    [votes]
+  );
+
   const value = useMemo(
     () => ({
       associations,
+      votes,
       refresh,
       add,
       vote,
+      unvote,
       remove,
+      hasVoted,
       syncing,
     }),
-    [associations, syncing, refresh, add, vote, remove]
+    [associations, votes, syncing, refresh, add, vote, unvote, remove, hasVoted]
   );
 
   return (

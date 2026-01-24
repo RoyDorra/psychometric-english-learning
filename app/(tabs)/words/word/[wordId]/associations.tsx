@@ -15,7 +15,8 @@ export default function WordAssociationsScreen() {
   const params = useLocalSearchParams<{ wordId?: string | string[] }>();
   const wordId = Array.isArray(params.wordId) ? params.wordId[0] : params.wordId;
   const { getWord } = useWords();
-  const { list, add, vote, remove, syncing, refresh } = useAssociations(wordId);
+  const { list, add, vote, unvote, remove, syncing, refresh, hasVoted } =
+    useAssociations(wordId);
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -54,6 +55,7 @@ export default function WordAssociationsScreen() {
   const renderAssociation = ({ item }: { item: Association }) => {
     const score = item.baseScore + (item.localDeltaScore ?? 0);
     const isSelected = selectedId === item.id;
+    const voted = hasVoted(item.id);
     return (
       <View style={styles.association}>
         <View style={{ flex: 1, gap: spacing.xs }}>
@@ -67,18 +69,15 @@ export default function WordAssociationsScreen() {
         </View>
         <View style={styles.voteRow}>
           <TouchableOpacity
-            onPress={() => vote(item.wordId, item.id, 1)}
-            style={[styles.voteBtn, styles.voteUp]}
-            hitSlop={6}
+            onPress={() =>
+              voted
+                ? unvote(item.wordId, item.id)
+                : vote(item.wordId, item.id, 1)
+            }
+            style={[styles.voteBtn, voted && styles.voteActive]}
+            hitSlop={8}
           >
-            <AppText style={styles.voteText}>מועיל</AppText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => vote(item.wordId, item.id, -1)}
-            style={[styles.voteBtn, styles.voteDown]}
-            hitSlop={6}
-          >
-            <AppText style={styles.voteText}>לא מועיל</AppText>
+            <AppText style={styles.voteEmoji}>👍</AppText>
           </TouchableOpacity>
         </View>
         <View style={styles.manageRow}>
@@ -264,24 +263,21 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   voteBtn: {
-    paddingHorizontal: spacing.s,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.s,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  voteUp: {
-    borderColor: "#bbf7d0",
-    backgroundColor: "#f0fdf4",
+  voteActive: {
+    borderColor: "#16a34a",
+    backgroundColor: "#dcfce7",
   },
-  voteDown: {
-    borderColor: "#fee2e2",
-    backgroundColor: "#fef2f2",
-  },
-  voteText: {
-    fontSize: 12,
-    fontWeight: "700",
+  voteEmoji: {
+    fontSize: 18,
   },
   manageRow: {
     flexDirection: "column",

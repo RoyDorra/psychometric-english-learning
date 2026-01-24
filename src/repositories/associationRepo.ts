@@ -3,6 +3,7 @@ import { STORAGE_KEYS } from "../storage/keys";
 import { getJson, setJson } from "../storage/storage";
 
 type AssociationState = Record<string, Association[]>;
+type AssociationVotesState = Record<string, Record<string, 1 | -1>>;
 
 function sortAssociations(list: Association[]) {
   return [...list].sort(
@@ -19,6 +20,14 @@ async function getState() {
 
 async function saveState(state: AssociationState) {
   await setJson(STORAGE_KEYS.ASSOCIATIONS, state);
+}
+
+async function getVotesState() {
+  return getJson<AssociationVotesState>(STORAGE_KEYS.ASSOCIATION_VOTES, {});
+}
+
+async function saveVotesState(state: AssociationVotesState) {
+  await setJson(STORAGE_KEYS.ASSOCIATION_VOTES, state);
 }
 
 export async function getAssociations(wordId: string) {
@@ -66,10 +75,19 @@ export async function addLocalAssociation(wordId: string, textHe: string) {
 export async function voteAssociation(
   wordId: string,
   associationId: string,
-  delta: 1 | -1
+  delta: 1 | -1,
+  voterId?: string
 ) {
   const state = await getState();
   const list = state[wordId] ?? [];
+  const votesState = await getVotesState();
+  const voterKey = voterId ?? "guest";
+  const userVotes = votesState[voterKey] ?? {};
+
+  if (userVotes[associationId]) {
+    return sortAssociations(list);
+  }
+
   const updated = list.map((association) =>
     association.id === associationId
       ? { ...association, localDeltaScore: (association.localDeltaScore ?? 0) + delta }
@@ -77,6 +95,37 @@ export async function voteAssociation(
   );
   state[wordId] = sortAssociations(updated);
   await saveState(state);
+  votesState[voterKey] = { ...userVotes, [associationId]: delta };
+  await saveVotesState(votesState);
+  return state[wordId];
+}
+
+export async function removeAssociationVote(
+  wordId: string,
+  associationId: string,
+  voterId?: string
+) {
+  const state = await getState();
+  const list = state[wordId] ?? [];
+  const votesState = await getVotesState();
+  const voterKey = voterId ?? "guest";
+  const userVotes = votesState[voterKey] ?? {};
+  const previous = userVotes[associationId];
+
+  if (!previous) {
+    return sortAssociations(list);
+  }
+
+  const updated = list.map((association) =>
+    association.id === associationId
+      ? { ...association, localDeltaScore: (association.localDeltaScore ?? 0) - previous }
+      : association
+  );
+  const { [associationId]: _, ...rest } = userVotes;
+  votesState[voterKey] = rest;
+  state[wordId] = sortAssociations(updated);
+  await saveState(state);
+  await saveVotesState(votesState);
   return state[wordId];
 }
 
@@ -97,4 +146,9 @@ export async function removeLocalAssociation(wordId: string, associationId: stri
 
 export async function getAssociationIndex() {
   return getState();
+}
+
+export async function getUserAssociationVotes(voterId: string) {
+  const state = await getVotesState();
+  return state[voterId] ?? {};
 }

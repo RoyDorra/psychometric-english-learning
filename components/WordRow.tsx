@@ -1,7 +1,7 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { Word, WordStatus } from "@/src/domain/types";
 import { getStatusColor } from "@/src/domain/status";
+import { Word, WordStatus } from "@/src/domain/types";
 import { colors, radius, spacing } from "@/src/ui/theme";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import AppText from "./AppText";
 import EnglishText from "./EnglishText";
 
@@ -43,8 +43,14 @@ export default function WordRow({
                 hitSlop={8}
                 style={[
                   styles.statusButton,
-                  { backgroundColor: active ? activeColor : getStatusColor(value) },
-                  active ? styles.statusButtonActive : styles.statusButtonInactive,
+                  {
+                    backgroundColor: active
+                      ? activeColor
+                      : getStatusColor(value),
+                  },
+                  active
+                    ? styles.statusButtonActive
+                    : styles.statusButtonInactive,
                 ]}
               />
             );
