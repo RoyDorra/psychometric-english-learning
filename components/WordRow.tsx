@@ -34,7 +34,7 @@ export default function WordRow({
         <View style={styles.statusButtonsRow}>
           {STATUS_BUTTONS.map((value) => {
             const active = currentStatus === value;
-            const activeColor =
+              const activeColor =
               value === "PARTIAL" ? "#f59e0b" : getStatusColor(value);
             return (
               <TouchableOpacity
@@ -46,7 +46,7 @@ export default function WordRow({
                   {
                     backgroundColor: active
                       ? activeColor
-                      : getStatusColor(value),
+                      : `${getStatusColor(value)}25`,
                   },
                   active
                     ? styles.statusButtonActive
@@ -71,9 +71,14 @@ const styles = StyleSheet.create({
     padding: spacing.m,
     borderWidth: 1,
     borderColor: colors.border,
+    shadowColor: "#1e1b4b",
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
   indicator: {
-    width: 10,
+    width: 8,
     height: "100%",
     borderRadius: radius.s,
   },
@@ -94,16 +99,17 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   statusButton: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     borderWidth: 1,
   },
   statusButtonInactive: {
-    opacity: 0.25,
-    borderColor: colors.border,
+    opacity: 0.5,
+    borderColor: `${colors.border}`,
   },
   statusButtonActive: {
     opacity: 1,
+    borderColor: "transparent",
   },
 });

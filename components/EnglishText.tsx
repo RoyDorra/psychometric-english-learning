@@ -25,7 +25,8 @@ const styles = StyleSheet.create({
     color: colors.text,
     writingDirection: "ltr",
     textAlign: "left",
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 19,
+    fontWeight: "700",
+    lineHeight: 26,
   },
 });

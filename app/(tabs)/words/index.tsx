@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import AppText from "@/components/AppText";
+import BuddyCard from "@/components/BuddyCard";
 import PrimaryButton from "@/components/PrimaryButton";
 import Screen from "@/components/Screen";
 import { wordsGroup } from "@/src/navigation/routes";
@@ -10,7 +11,7 @@ import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function WordsHomeScreen() {
   const router = useRouter();
-  const { groups, helpSeen, markHelpSeen, loading } = useWords();
+  const { groups, helpSeen, markHelpSeen, loading, getWordsForGroup, statuses } = useWords();
 
   useEffect(() => {
     if (!loading && !helpSeen) {
@@ -23,6 +24,15 @@ export default function WordsHomeScreen() {
     <Screen withPadding>
       <View style={styles.headerRow}>
         <AppText style={styles.title}>קבוצות מילים</AppText>
+      </View>
+      <View style={{ marginBottom: spacing.m }}>
+        <BuddyCard
+          known={groups.reduce((acc, group) => {
+            const list = getWordsForGroup(group.id);
+            return acc + list.filter((w) => statuses[w.id] === "KNOW").length;
+          }, 0)}
+          total={groups.reduce((acc, group) => acc + getWordsForGroup(group.id).length, 0)}
+        />
       </View>
       <FlatList
         data={groups}

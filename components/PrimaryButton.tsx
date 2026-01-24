@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, ViewStyle } from "react-native";
 import { colors, radius, spacing } from "@/src/ui/theme";
 
 type Props = {
@@ -15,15 +15,15 @@ export default function PrimaryButton({
   loading = false,
 }: Props) {
   const isDisabled = disabled || loading;
+  const containerStyle: ViewStyle[] = [styles.button];
+  if (isDisabled) containerStyle.push(styles.disabled);
+
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={isDisabled}
-      style={[
-        styles.button,
-        isDisabled && styles.disabled,
-      ]}
-    >
+      style={containerStyle}
+      >
       {loading ? (
         <ActivityIndicator color="#fff" />
       ) : (
@@ -39,9 +39,15 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.m,
     borderRadius: radius.m,
     alignItems: "center",
+    shadowColor: "#1e1b4b",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
   },
   disabled: {
     backgroundColor: colors.primaryMuted,
+    shadowOpacity: 0,
   },
   text: {
     color: "#fff",

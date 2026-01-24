@@ -3,14 +3,14 @@ import { WordStatus } from "./types";
 export const STATUS_LABELS: Record<WordStatus, string> = {
   UNMARKED: "לא סווג",
   DONT_KNOW: "לא יודע",
-  PARTIAL: "בערך / לא בטוח",
+  PARTIAL: "לא בטוח",
   KNOW: "יודע",
 };
 
 export const STATUS_COLORS: Record<WordStatus, string> = {
-  UNMARKED: "#9ca3af",
+  UNMARKED: "#cbd5e1",
   DONT_KNOW: "#ef4444",
-  PARTIAL: "#facc15",
+  PARTIAL: "#fbbf24",
   KNOW: "#22c55e",
 };
 

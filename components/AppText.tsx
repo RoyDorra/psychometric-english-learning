@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     writingDirection: "rtl",
     textAlign: "right",
-    fontSize: 16,
+    fontSize: 17,
+    lineHeight: 24,
   },
 });

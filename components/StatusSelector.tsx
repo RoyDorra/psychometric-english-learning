@@ -18,15 +18,16 @@ export default function StatusSelector({ value, onChange, compact }: Props) {
     <View style={[styles.container, compact && styles.compact]}>
       {DEFAULT_REVIEW_STATUSES.map((status) => {
         const active = value === status;
-        const backgroundColor = active ? getStatusColor(status) : colors.surface;
-        const textColor = active ? "#fff" : colors.text;
+        const backgroundColor = active ? `${getStatusColor(status)}20` : colors.surface;
+        const textColor = active ? colors.text : colors.muted;
+        const borderColor = active ? getStatusColor(status) : colors.border;
         return (
           <TouchableOpacity
             key={status}
             onPress={() => onChange(status)}
             style={[
               styles.option,
-              { backgroundColor },
+              { backgroundColor, borderColor },
               active && styles.active,
             ]}
           >
@@ -52,12 +53,17 @@ const styles = StyleSheet.create({
   option: {
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
-    borderRadius: radius.s,
+    borderRadius: radius.m,
     borderWidth: 1,
     borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   active: {
-    borderColor: "transparent",
+    shadowColor: "#1e1b4b",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
   text: {
     fontWeight: "600",
