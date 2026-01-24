@@ -49,7 +49,7 @@ export default function StudyPagerScreen() {
   const prev = () => setPage((p) => Math.max(0, p - 1));
 
   return (
-    <Screen withPadding>
+    <Screen withPadding scrollable>
       <View style={styles.header}>
         <AppText style={styles.title}>{groupName}</AppText>
         <AppText style={styles.subtitle}>
