@@ -13,7 +13,9 @@ import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function WordAssociationsScreen() {
   const params = useLocalSearchParams<{ wordId?: string | string[] }>();
-  const wordId = Array.isArray(params.wordId) ? params.wordId[0] : params.wordId;
+  const wordId = Array.isArray(params.wordId)
+    ? params.wordId[0]
+    : params.wordId;
   const { getWord } = useWords();
   const { list, add, vote, unvote, remove, syncing, refresh, hasVoted } =
     useAssociations(wordId);
@@ -26,8 +28,9 @@ export default function WordAssociationsScreen() {
   const sortedList = useMemo(() => {
     return [...list].sort(
       (a, b) =>
-        b.baseScore + (b.localDeltaScore ?? 0) -
-        (a.baseScore + (a.localDeltaScore ?? 0))
+        b.baseScore +
+        (b.localDeltaScore ?? 0) -
+        (a.baseScore + (a.localDeltaScore ?? 0)),
     );
   }, [list]);
 
@@ -83,16 +86,10 @@ export default function WordAssociationsScreen() {
         <View style={styles.manageRow}>
           <TouchableOpacity
             onPress={() => handleSelectAssociation(item.id, item.textHe)}
-            style={[
-              styles.manageBtn,
-              isSelected && styles.manageBtnActive,
-            ]}
+            style={[styles.manageBtn, isSelected && styles.manageBtnActive]}
           >
             <AppText
-              style={[
-                styles.manageText,
-                isSelected && styles.manageTextActive,
-              ]}
+              style={[styles.manageText, isSelected && styles.manageTextActive]}
             >
               {isSelected ? "נבחר" : "בחר"}
             </AppText>
@@ -137,10 +134,8 @@ export default function WordAssociationsScreen() {
           <View style={{ gap: spacing.l, marginBottom: spacing.m }}>
             <View style={styles.headerCard}>
               <AppText style={styles.title}>אסוציאציות עבור</AppText>
-              <EnglishText style={styles.english}>{word.english}</EnglishText>
-              <AppText style={styles.hebrew}>
-                {word.hebrewTranslations.join(" / ")}
-              </AppText>
+              <EnglishText style={styles.english}>{word.en}</EnglishText>
+              <AppText style={styles.hebrew}>{word.he.join(" / ")}</AppText>
             </View>
 
             <View style={styles.addCard}>
