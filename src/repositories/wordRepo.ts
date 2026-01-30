@@ -1,5 +1,8 @@
-import { GROUPS, WORDS } from "../data/words";
-import { DEFAULT_STUDY_STATUSES, DEFAULT_REVIEW_STATUSES } from "../domain/status";
+import { GROUPS, WORDS, WORD_BY_ID } from "../data/words";
+import {
+  DEFAULT_STUDY_STATUSES,
+  DEFAULT_REVIEW_STATUSES,
+} from "../domain/status";
 import {
   Group,
   HelpPreference,
@@ -22,6 +25,18 @@ function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
 }
 
+const GROUP_ID_TO_NUMBER = new Map(
+  GROUPS.map((group) => [group.id, group.order]),
+);
+
+function resolveGroupNumber(groupId: string | number) {
+  if (typeof groupId === "number") return groupId;
+  const fromId = GROUP_ID_TO_NUMBER.get(groupId);
+  if (fromId) return fromId;
+  const parsed = Number(groupId);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export function getGroups(): Group[] {
   return GROUPS;
 }
@@ -30,12 +45,14 @@ export function getWords(): Word[] {
   return WORDS;
 }
 
-export function getWordsByGroup(groupId: string) {
-  return WORDS.filter((word) => word.groupId === groupId);
+export function getWordsByGroup(groupId: string | number) {
+  const groupNumber = resolveGroupNumber(groupId);
+  if (!groupNumber) return [];
+  return WORDS.filter((word) => word.group === groupNumber);
 }
 
 export function getWordById(wordId: string) {
-  return WORDS.find((w) => w.id === wordId) ?? null;
+  return WORD_BY_ID.get(wordId) ?? null;
 }
 
 export async function getStatuses(email: string) {
@@ -46,7 +63,7 @@ export async function getStatuses(email: string) {
 export async function setStatus(
   email: string,
   wordId: string,
-  status: WordStatus
+  status: WordStatus,
 ) {
   const all = await getJson<StatusState>(STORAGE_KEYS.STATUSES, {});
   const existing = all[email] ?? {};
@@ -61,7 +78,10 @@ export async function getHelpPreference(email: string) {
   return prefs[email] ?? { seen: false };
 }
 
-export async function setHelpPreference(email: string, preference: HelpPreference) {
+export async function setHelpPreference(
+  email: string,
+  preference: HelpPreference,
+) {
   const prefs = await getJson<HelpState>(STORAGE_KEYS.HELP, {});
   prefs[email] = preference;
   await setJson(STORAGE_KEYS.HELP, prefs);
@@ -80,7 +100,7 @@ export async function getStudyPreferences(email: string) {
 
 export async function setStudyPreferences(
   email: string,
-  preferences: StudyPreferences
+  preferences: StudyPreferences,
 ) {
   const prefs = await getJson<StudyState>(STORAGE_KEYS.STUDY_PREFS, {});
   prefs[email] = preferences;
@@ -98,10 +118,7 @@ export async function getReviewFilters(email: string) {
   );
 }
 
-export async function setReviewFilters(
-  email: string,
-  filters: ReviewFilters
-) {
+export async function setReviewFilters(email: string, filters: ReviewFilters) {
   const prefs = await getJson<ReviewState>(STORAGE_KEYS.REVIEW_PREFS, {});
   prefs[email] = filters;
   await setJson(STORAGE_KEYS.REVIEW_PREFS, prefs);

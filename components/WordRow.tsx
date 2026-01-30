@@ -27,10 +27,8 @@ export default function WordRow({
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <View style={[styles.indicator, { backgroundColor: indicatorColor }]} />
       <View style={styles.content}>
-        <EnglishText style={styles.english}>{word.english}</EnglishText>
-        <AppText style={styles.hebrew}>
-          {word.hebrewTranslations.join(" / ")}
-        </AppText>
+        <EnglishText style={styles.english}>{word.en}</EnglishText>
+        <AppText style={styles.hebrew}>{word.he.join(" / ")}</AppText>
         <View style={styles.statusButtonsRow}>
           {STATUS_BUTTONS.map((value) => {
             const active = currentStatus === value;

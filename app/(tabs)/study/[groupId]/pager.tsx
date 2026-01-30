@@ -18,8 +18,14 @@ function parseStatuses(raw?: string): WordStatus[] {
 
 export default function StudyPagerScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ groupId: string; chunkSize?: string; statuses?: string }>();
-  const groupId = Array.isArray(params.groupId) ? params.groupId[0] : params.groupId;
+  const params = useLocalSearchParams<{
+    groupId: string;
+    chunkSize?: string;
+    statuses?: string;
+  }>();
+  const groupId = Array.isArray(params.groupId)
+    ? params.groupId[0]
+    : params.groupId;
   const chunkSize = Math.max(1, Number(params.chunkSize) || 7);
   const selectedStatuses = parseStatuses(params.statuses);
   const { getWordsForGroup, statuses, updateStatus, groups } = useWords();
@@ -30,12 +36,12 @@ export default function StudyPagerScreen() {
     const list = getWordsForGroup(groupId);
     if (!selectedStatuses.length) return list;
     return list.filter((word) =>
-      selectedStatuses.includes(statuses[word.id] ?? "UNMARKED")
+      selectedStatuses.includes(statuses[word.id] ?? "UNMARKED"),
     );
   }, [groupId, getWordsForGroup, selectedStatuses, statuses]);
 
   const chunks = useMemo(() => {
-    const arr: typeof filteredWords[] = [];
+    const arr: (typeof filteredWords)[] = [];
     for (let i = 0; i < filteredWords.length; i += chunkSize) {
       arr.push(filteredWords.slice(i, i + chunkSize));
     }
@@ -76,10 +82,8 @@ export default function StudyPagerScreen() {
             const status = statuses[word.id] ?? "UNMARKED";
             return (
               <View key={word.id} style={styles.card}>
-                <EnglishText style={styles.english}>{word.english}</EnglishText>
-                <AppText style={styles.hebrew}>
-                  {word.hebrewTranslations.join(" / ")}
-                </AppText>
+                <EnglishText style={styles.english}>{word.en}</EnglishText>
+                <AppText style={styles.hebrew}>{word.he.join(" / ")}</AppText>
                 <StatusSelector
                   value={status}
                   onChange={(next) => updateStatus(word.id, next)}

@@ -21,14 +21,23 @@ import {
   setStatus,
   setStudyPreferences,
 } from "../repositories/wordRepo";
-import { Group, ReviewFilters, StudyPreferences, Word, WordStatus } from "../domain/types";
+import {
+  Group,
+  ReviewFilters,
+  StudyPreferences,
+  Word,
+  WordStatus,
+} from "../domain/types";
 import { useAuth } from "./useAuth";
-import { DEFAULT_REVIEW_STATUSES, DEFAULT_STUDY_STATUSES } from "../domain/status";
+import {
+  DEFAULT_REVIEW_STATUSES,
+  DEFAULT_STUDY_STATUSES,
+} from "../domain/status";
 
 type WordContextValue = {
   statuses: Record<string, WordStatus>;
   groups: Group[];
-  getWordsForGroup: (groupId: string) => Word[];
+  getWordsForGroup: (groupId: string | number) => Word[];
   getWord: (wordId: string) => Word | null;
   updateStatus: (wordId: string, status: WordStatus) => Promise<void>;
   studyPreferences: StudyPreferences;
@@ -77,12 +86,13 @@ export function WordProvider({ children }: PropsWithChildren) {
         return;
       }
       setLoading(true);
-      const [loadedStatuses, helpPref, studyPrefs, reviewPrefs] = await Promise.all([
-        getStatuses(email),
-        getHelpPreference(email),
-        getStudyPreferences(email),
-        getReviewFilters(email),
-      ]);
+      const [loadedStatuses, helpPref, studyPrefs, reviewPrefs] =
+        await Promise.all([
+          getStatuses(email),
+          getHelpPreference(email),
+          getStudyPreferences(email),
+          getReviewFilters(email),
+        ]);
       if (!active) return;
       setStatuses(loadedStatuses);
       setHelpSeen(helpPref.seen);
@@ -101,7 +111,7 @@ export function WordProvider({ children }: PropsWithChildren) {
       setStatuses((prev) => ({ ...prev, [wordId]: status }));
       await setStatus(email, wordId, status);
     },
-    [email]
+    [email],
   );
 
   const updateStudyPreferences = useCallback(
@@ -110,7 +120,7 @@ export function WordProvider({ children }: PropsWithChildren) {
       setStudyPrefsState(prefs);
       await setStudyPreferences(email, prefs);
     },
-    [email]
+    [email],
   );
 
   const updateReviewFilters = useCallback(
@@ -119,7 +129,7 @@ export function WordProvider({ children }: PropsWithChildren) {
       setReviewFiltersState(filters);
       await setReviewFilters(email, filters);
     },
-    [email]
+    [email],
   );
 
   const markHelpSeen = useCallback(async () => {
@@ -154,7 +164,7 @@ export function WordProvider({ children }: PropsWithChildren) {
       updateStudyPreferences,
       updateReviewFilters,
       markHelpSeen,
-    ]
+    ],
   );
 
   return <WordContext.Provider value={value}>{children}</WordContext.Provider>;
