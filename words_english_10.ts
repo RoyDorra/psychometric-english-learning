@@ -450,5 +450,5 @@ export default [
   ["obsession", "אובססיה, דיבוק, קיבעון"],
   ["sanction", "קנס, עידוד, עונש"],
   ["gymnasium", "אולם ספורט"],
-  ["unearth", "לחפור, לחשוף"],
+  ["unearth", "לחפור, לחשוף"]
 ] as const;
