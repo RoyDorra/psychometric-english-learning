@@ -1,127 +1,190 @@
 import {
   createContext,
   PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
-  useCallback,
 } from "react";
 import {
-  addLocalAssociation,
-  getAssociationIndex,
-  getUserAssociationVotes,
-  removeAssociationVote,
-  removeLocalAssociation,
-  voteAssociation,
+  createPrivateAssociation,
+  createPublicAssociation,
+  deletePrivateAssociation,
+  listPrivateByWord,
+  listPublicByWord,
+  listSavedByWord,
+  toggleLike as toggleLikeRepo,
+  toggleSave as toggleSaveRepo,
 } from "../repositories/associationRepo";
-import { Association } from "../domain/types";
-import { syncAssociationsIfPossible } from "../core/bootstrap";
+import {
+  PrivateAssociation,
+  PublicAssociationView,
+} from "../domain/types";
 import { useAuth } from "./useAuth";
 
 type AssociationsContextValue = {
-  associations: Record<string, Association[]>;
-  votes: Record<string, 1 | -1>;
-  refresh: () => Promise<void>;
-  add: (wordId: string, text: string) => Promise<Association[]>;
-  vote: (wordId: string, associationId: string, delta: 1 | -1) => Promise<Association[]>;
-  unvote: (wordId: string, associationId: string) => Promise<Association[]>;
-  remove: (wordId: string, associationId: string) => Promise<Association[]>;
-  hasVoted: (associationId: string) => boolean;
-  syncing: boolean;
+  publicLists: Record<string, PublicAssociationView[]>;
+  savedLists: Record<string, PublicAssociationView[]>;
+  privateLists: Record<string, PrivateAssociation[]>;
+  loading: boolean;
+  refresh: (wordId?: string) => Promise<void>;
+  addPublic: (wordId: string, textHe: string) => Promise<void>;
+  addPrivate: (wordId: string, textHe: string) => Promise<void>;
+  toggleLike: (wordId: string, associationId: string) => Promise<void>;
+  toggleSave: (wordId: string, associationId: string) => Promise<void>;
+  deletePrivate: (wordId: string, associationId: string) => Promise<void>;
 };
 
-const AssociationsContext = createContext<AssociationsContextValue | undefined>(undefined);
+const AssociationsContext = createContext<AssociationsContextValue | undefined>(
+  undefined,
+);
 
 export function AssociationsProvider({ children }: PropsWithChildren) {
   const { session } = useAuth();
-  const [associations, setAssociations] = useState<Record<string, Association[]>>({});
-  const [votes, setVotes] = useState<Record<string, 1 | -1>>({});
-  const [syncing, setSyncing] = useState(false);
   const userId = session?.user.id ?? "guest";
+  const [publicLists, setPublicLists] = useState<
+    Record<string, PublicAssociationView[]>
+  >({});
+  const [savedLists, setSavedLists] = useState<
+    Record<string, PublicAssociationView[]>
+  >({});
+  const [privateLists, setPrivateLists] = useState<
+    Record<string, PrivateAssociation[]>
+  >({});
+  const [loading, setLoading] = useState(false);
+  const trackedWordIdsRef = useRef<Set<string>>(new Set());
 
-  const load = useCallback(async () => {
-    const map = await getAssociationIndex();
-    setAssociations(map);
-  }, []);
-
-  const loadVotes = useCallback(async () => {
-    const map = await getUserAssociationVotes(userId);
-    setVotes(map);
+  useEffect(() => {
+    setPublicLists({});
+    setSavedLists({});
+    setPrivateLists({});
+    trackedWordIdsRef.current = new Set();
   }, [userId]);
 
-  const refresh = useCallback(async () => {
-    setSyncing(true);
-    await syncAssociationsIfPossible();
-    await load();
-    await loadVotes();
-    setSyncing(false);
-  }, [load, loadVotes]);
+  const refresh = useCallback(
+    async (wordId?: string) => {
+      const targets = wordId
+        ? [wordId]
+        : Array.from(trackedWordIdsRef.current);
 
-  useEffect(() => {
-    load();
-    loadVotes();
-  }, [load, loadVotes]);
+      if (wordId) {
+        trackedWordIdsRef.current.add(wordId);
+      }
 
-  useEffect(() => {
-    if (session) {
-      refresh();
-    }
-  }, [session, refresh]);
+      if (!targets.length) {
+        return;
+      }
 
-  const add = useCallback(async (wordId: string, text: string) => {
-    const list = await addLocalAssociation(wordId, text.trim());
-    setAssociations((prev) => ({ ...prev, [wordId]: list }));
-    return list;
-  }, []);
+      setLoading(true);
+      try {
+        const results = await Promise.all(
+          targets.map(async (id) => {
+            const [publicList, savedList, privateList] = await Promise.all([
+              listPublicByWord(id, userId),
+              listSavedByWord(id, userId),
+              listPrivateByWord(id, userId),
+            ]);
+            return { id, publicList, savedList, privateList };
+          }),
+        );
 
-  const vote = useCallback(async (wordId: string, associationId: string, delta: 1 | -1) => {
-    if (votes[associationId]) {
-      return associations[wordId] ?? [];
-    }
-    const list = await voteAssociation(wordId, associationId, delta, userId);
-    setAssociations((prev) => ({ ...prev, [wordId]: list }));
-    setVotes((prev) => ({ ...prev, [associationId]: delta }));
-    return list;
-  }, [associations, votes, userId]);
+        setPublicLists((prev) => {
+          const next = { ...prev };
+          results.forEach(({ id, publicList }) => {
+            next[id] = publicList;
+          });
+          return next;
+        });
 
-  const unvote = useCallback(async (wordId: string, associationId: string) => {
-    if (!votes[associationId]) {
-      return associations[wordId] ?? [];
-    }
-    const list = await removeAssociationVote(wordId, associationId, userId);
-    setAssociations((prev) => ({ ...prev, [wordId]: list }));
-    setVotes((prev) => {
-      const { [associationId]: _, ...rest } = prev;
-      return rest;
-    });
-    return list;
-  }, [associations, votes, userId]);
+        setSavedLists((prev) => {
+          const next = { ...prev };
+          results.forEach(({ id, savedList }) => {
+            next[id] = savedList;
+          });
+          return next;
+        });
 
-  const remove = useCallback(async (wordId: string, associationId: string) => {
-    const list = await removeLocalAssociation(wordId, associationId);
-    setAssociations((prev) => ({ ...prev, [wordId]: list }));
-    return list;
-  }, []);
+        setPrivateLists((prev) => {
+          const next = { ...prev };
+          results.forEach(({ id, privateList }) => {
+            next[id] = privateList;
+          });
+          return next;
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userId],
+  );
 
-  const hasVoted = useCallback(
-    (associationId: string) => Boolean(votes[associationId]),
-    [votes]
+  const addPublic = useCallback(
+    async (wordId: string, textHe: string) => {
+      await createPublicAssociation(wordId, textHe.trim(), userId);
+      await refresh(wordId);
+    },
+    [refresh, userId],
+  );
+
+  const addPrivate = useCallback(
+    async (wordId: string, textHe: string) => {
+      await createPrivateAssociation(wordId, textHe.trim(), userId);
+      await refresh(wordId);
+    },
+    [refresh, userId],
+  );
+
+  const toggleLike = useCallback(
+    async (wordId: string, associationId: string) => {
+      await toggleLikeRepo(associationId, userId);
+      await refresh(wordId);
+    },
+    [refresh, userId],
+  );
+
+  const toggleSave = useCallback(
+    async (wordId: string, associationId: string) => {
+      await toggleSaveRepo(associationId, userId);
+      await refresh(wordId);
+    },
+    [refresh, userId],
+  );
+
+  const deletePrivate = useCallback(
+    async (wordId: string, associationId: string) => {
+      await deletePrivateAssociation(associationId, wordId, userId);
+      await refresh(wordId);
+    },
+    [refresh, userId],
   );
 
   const value = useMemo(
     () => ({
-      associations,
-      votes,
+      publicLists,
+      savedLists,
+      privateLists,
+      loading,
       refresh,
-      add,
-      vote,
-      unvote,
-      remove,
-      hasVoted,
-      syncing,
+      addPublic,
+      addPrivate,
+      toggleLike,
+      toggleSave,
+      deletePrivate,
     }),
-    [associations, votes, syncing, refresh, add, vote, unvote, remove, hasVoted]
+    [
+      publicLists,
+      savedLists,
+      privateLists,
+      loading,
+      refresh,
+      addPublic,
+      addPrivate,
+      toggleLike,
+      toggleSave,
+      deletePrivate,
+    ],
   );
 
   return (
@@ -134,9 +197,28 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
 export function useAssociations(wordId?: string) {
   const ctx = useContext(AssociationsContext);
   if (!ctx) throw new Error("useAssociations must be used within AssociationsProvider");
-  const list = wordId ? ctx.associations[wordId] ?? [] : [];
+  const refresh = ctx.refresh;
+
+  useEffect(() => {
+    if (wordId) {
+      refresh(wordId);
+    }
+  }, [refresh, wordId]);
+
+  const publicList = wordId ? ctx.publicLists[wordId] ?? [] : [];
+  const savedList = wordId ? ctx.savedLists[wordId] ?? [] : [];
+  const privateList = wordId ? ctx.privateLists[wordId] ?? [] : [];
+
   return {
-    ...ctx,
-    list,
+    publicList,
+    savedList,
+    privateList,
+    addPublic: ctx.addPublic,
+    addPrivate: ctx.addPrivate,
+    toggleLike: ctx.toggleLike,
+    toggleSave: ctx.toggleSave,
+    deletePrivate: ctx.deletePrivate,
+    refresh: ctx.refresh,
+    loading: ctx.loading,
   };
 }

@@ -11,6 +11,7 @@ import {
 } from "@/src/domain/status";
 import { WordStatus } from "@/src/domain/types";
 import { useWords } from "@/src/hooks/useWords";
+import { DEFAULT_CHUNK_SIZE } from "@/src/repositories/wordRepo";
 import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function StudySetupScreen() {
@@ -32,7 +33,7 @@ export default function StudySetupScreen() {
   };
 
   const handleStart = async () => {
-    const normalizedChunk = Math.max(1, Number(chunkSize) || DEFAULT_STUDY_STATUSES.length);
+    const normalizedChunk = Math.max(1, Number(chunkSize) || DEFAULT_CHUNK_SIZE);
     await setStudyPreferences({
       chunkSize: normalizedChunk,
       statuses: statuses.length ? statuses : DEFAULT_STUDY_STATUSES,
