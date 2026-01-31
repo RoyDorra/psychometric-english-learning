@@ -1,154 +1,219 @@
-import { Association } from "../domain/types";
+import {
+  PrivateAssociation,
+  PublicAssociation,
+  PublicAssociationView,
+} from "../domain/types";
 import { STORAGE_KEYS } from "../storage/keys";
 import { getJson, setJson } from "../storage/storage";
+import { uuid } from "../utils/uuid";
 
-type AssociationState = Record<string, Association[]>;
-type AssociationVotesState = Record<string, Record<string, 1 | -1>>;
+type PrivateAssociationsState = Record<string, PrivateAssociation[]>;
+type AssociationFlagState = Record<string, boolean>;
 
-function sortAssociations(list: Association[]) {
+const sortPublic = <T extends PublicAssociation>(list: T[]): T[] =>
+  [...list].sort((a, b) => {
+    if (b.likeCount !== a.likeCount) {
+      return b.likeCount - a.likeCount;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+async function getPublicState() {
+  return getJson<PublicAssociation[]>(STORAGE_KEYS.PUBLIC_ASSOCIATIONS, []);
+}
+
+async function savePublicState(state: PublicAssociation[]) {
+  await setJson(STORAGE_KEYS.PUBLIC_ASSOCIATIONS, state);
+}
+
+async function getPrivateState(userId: string) {
+  return getJson<PrivateAssociationsState>(
+    STORAGE_KEYS.PRIVATE_ASSOCIATIONS(userId),
+    {},
+  );
+}
+
+async function savePrivateState(userId: string, state: PrivateAssociationsState) {
+  await setJson(STORAGE_KEYS.PRIVATE_ASSOCIATIONS(userId), state);
+}
+
+async function getLikesState(userId: string) {
+  return getJson<AssociationFlagState>(STORAGE_KEYS.ASSOCIATION_LIKES(userId), {});
+}
+
+async function saveLikesState(userId: string, state: AssociationFlagState) {
+  await setJson(STORAGE_KEYS.ASSOCIATION_LIKES(userId), state);
+}
+
+async function getSavesState(userId: string) {
+  return getJson<AssociationFlagState>(STORAGE_KEYS.ASSOCIATION_SAVES(userId), {});
+}
+
+async function saveSavesState(userId: string, state: AssociationFlagState) {
+  await setJson(STORAGE_KEYS.ASSOCIATION_SAVES(userId), state);
+}
+
+export async function listPublicByWord(
+  wordId: string,
+  userId: string,
+): Promise<PublicAssociationView[]> {
+  const [allPublic, likes, saves] = await Promise.all([
+    getPublicState(),
+    getLikesState(userId),
+    getSavesState(userId),
+  ]);
+
+  const views = allPublic
+    .filter((assoc) => assoc.wordId === wordId)
+    .map(
+      (assoc): PublicAssociationView => ({
+        ...assoc,
+        isLikedByMe: Boolean(likes[assoc.id]),
+        isSavedByMe: Boolean(saves[assoc.id]),
+      }),
+    );
+
+  return sortPublic(views);
+}
+
+export async function listSavedByWord(
+  wordId: string,
+  userId: string,
+): Promise<PublicAssociationView[]> {
+  const [allPublic, likes, saves] = await Promise.all([
+    getPublicState(),
+    getLikesState(userId),
+    getSavesState(userId),
+  ]);
+
+  const views = allPublic
+    .filter((assoc) => assoc.wordId === wordId && saves[assoc.id])
+    .map(
+      (assoc): PublicAssociationView => ({
+        ...assoc,
+        isLikedByMe: Boolean(likes[assoc.id]),
+        isSavedByMe: true,
+      }),
+    );
+
+  return sortPublic(views);
+}
+
+export async function listPrivateByWord(
+  wordId: string,
+  userId: string,
+): Promise<PrivateAssociation[]> {
+  const state = await getPrivateState(userId);
+  const list = state[wordId] ?? [];
   return [...list].sort(
     (a, b) =>
-      b.baseScore +
-      b.localDeltaScore -
-      (a.baseScore + a.localDeltaScore)
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 }
 
-async function getState() {
-  return getJson<AssociationState>(STORAGE_KEYS.ASSOCIATIONS, {});
-}
-
-async function saveState(state: AssociationState) {
-  await setJson(STORAGE_KEYS.ASSOCIATIONS, state);
-}
-
-async function getVotesState() {
-  return getJson<AssociationVotesState>(STORAGE_KEYS.ASSOCIATION_VOTES, {});
-}
-
-async function saveVotesState(state: AssociationVotesState) {
-  await setJson(STORAGE_KEYS.ASSOCIATION_VOTES, state);
-}
-
-export async function getAssociations(wordId: string) {
-  const state = await getState();
-  return sortAssociations(state[wordId] ?? []);
-}
-
-export async function upsertRemoteAssociations(map: AssociationState) {
-  const state = await getState();
-  Object.entries(map).forEach(([wordId, remoteList]) => {
-    const existing = state[wordId] ?? [];
-    const locals = existing.filter((a) => a.source === "local");
-    const mergedRemote = remoteList.map((remote) => {
-      const previous = existing.find((a) => a.id === remote.id);
-      return {
-        ...remote,
-        source: "remote" as const,
-        localDeltaScore: previous?.localDeltaScore ?? 0,
-      };
-    });
-    state[wordId] = sortAssociations([...mergedRemote, ...locals]);
-  });
-  await saveState(state);
-  return state;
-}
-
-export async function addLocalAssociation(wordId: string, textHe: string) {
-  const state = await getState();
+export async function createPublicAssociation(
+  wordId: string,
+  textHe: string,
+  userId: string,
+): Promise<void> {
+  const list = await getPublicState();
   const now = new Date().toISOString();
-  const newAssociation: Association = {
-    id: `local-${Date.now()}`,
+  const newAssociation: PublicAssociation = {
+    id: uuid(),
     wordId,
     textHe,
-    baseScore: 0,
-    localDeltaScore: 0,
-    source: "local",
+    createdByUserId: userId,
     createdAt: now,
+    updatedAt: now,
+    likeCount: 0,
+  };
+  await savePublicState([newAssociation, ...list]);
+}
+
+export async function createPrivateAssociation(
+  wordId: string,
+  textHe: string,
+  userId: string,
+): Promise<void> {
+  const state = await getPrivateState(userId);
+  const now = new Date().toISOString();
+  const next: PrivateAssociation = {
+    id: uuid(),
+    wordId,
+    textHe,
+    userId,
+    createdAt: now,
+    updatedAt: now,
   };
   const existing = state[wordId] ?? [];
-  state[wordId] = sortAssociations([newAssociation, ...existing]);
-  await saveState(state);
-  return state[wordId];
+  state[wordId] = [next, ...existing];
+  await savePrivateState(userId, state);
 }
 
-export async function voteAssociation(
-  wordId: string,
-  associationId: string,
-  delta: 1 | -1,
-  voterId?: string
-) {
-  const state = await getState();
-  const list = state[wordId] ?? [];
-  const votesState = await getVotesState();
-  const voterKey = voterId ?? "guest";
-  const userVotes = votesState[voterKey] ?? {};
-
-  if (userVotes[associationId]) {
-    return sortAssociations(list);
+export async function toggleLike(associationId: string, userId: string) {
+  const [publicList, likes] = await Promise.all([
+    getPublicState(),
+    getLikesState(userId),
+  ]);
+  const isLiked = Boolean(likes[associationId]);
+  const updatedLikes = { ...likes };
+  if (isLiked) {
+    delete updatedLikes[associationId];
+  } else {
+    updatedLikes[associationId] = true;
   }
 
-  const updated = list.map((association) =>
-    association.id === associationId
-      ? { ...association, localDeltaScore: (association.localDeltaScore ?? 0) + delta }
-      : association
+  const updatedPublic = publicList.map((assoc) =>
+    assoc.id === associationId
+      ? {
+          ...assoc,
+          likeCount: Math.max(0, assoc.likeCount + (isLiked ? -1 : 1)),
+          updatedAt: new Date().toISOString(),
+        }
+      : assoc,
   );
-  state[wordId] = sortAssociations(updated);
-  await saveState(state);
-  votesState[voterKey] = { ...userVotes, [associationId]: delta };
-  await saveVotesState(votesState);
-  return state[wordId];
+
+  await Promise.all([
+    savePublicState(updatedPublic),
+    saveLikesState(userId, updatedLikes),
+  ]);
 }
 
-export async function removeAssociationVote(
-  wordId: string,
-  associationId: string,
-  voterId?: string
-) {
-  const state = await getState();
-  const list = state[wordId] ?? [];
-  const votesState = await getVotesState();
-  const voterKey = voterId ?? "guest";
-  const userVotes = votesState[voterKey] ?? {};
-  const previous = userVotes[associationId];
-
-  if (!previous) {
-    return sortAssociations(list);
+export async function toggleSave(associationId: string, userId: string) {
+  const saves = await getSavesState(userId);
+  const updated = { ...saves };
+  if (updated[associationId]) {
+    delete updated[associationId];
+  } else {
+    updated[associationId] = true;
   }
-
-  const updated = list.map((association) =>
-    association.id === associationId
-      ? { ...association, localDeltaScore: (association.localDeltaScore ?? 0) - previous }
-      : association
-  );
-  const { [associationId]: _, ...rest } = userVotes;
-  votesState[voterKey] = rest;
-  state[wordId] = sortAssociations(updated);
-  await saveState(state);
-  await saveVotesState(votesState);
-  return state[wordId];
+  await saveSavesState(userId, updated);
 }
 
-export async function removeLocalAssociation(wordId: string, associationId: string) {
-  const state = await getState();
+export async function deletePrivateAssociation(
+  associationId: string,
+  wordId: string,
+  userId: string,
+): Promise<void> {
+  const state = await getPrivateState(userId);
   const existing = state[wordId] ?? [];
-  const filtered = existing.filter(
-    (association) =>
-      association.id !== associationId || association.source !== "local"
+  const filtered = existing.filter((assoc) => assoc.id !== associationId);
+  state[wordId] = filtered;
+  await savePrivateState(userId, state);
+}
+
+export async function updatePrivateAssociation(
+  associationId: string,
+  wordId: string,
+  userId: string,
+  textHe: string,
+): Promise<void> {
+  const state = await getPrivateState(userId);
+  const existing = state[wordId] ?? [];
+  state[wordId] = existing.map((assoc) =>
+    assoc.id === associationId
+      ? { ...assoc, textHe, updatedAt: new Date().toISOString() }
+      : assoc,
   );
-  if (filtered.length === existing.length) {
-    return existing;
-  }
-  state[wordId] = sortAssociations(filtered);
-  await saveState(state);
-  return state[wordId];
-}
-
-export async function getAssociationIndex() {
-  return getState();
-}
-
-export async function getUserAssociationVotes(voterId: string) {
-  const state = await getVotesState();
-  return state[voterId] ?? {};
+  await savePrivateState(userId, state);
 }

@@ -14,26 +14,44 @@ export type Group = {
   order: number;
 };
 
-export type AssociationSource = "remote" | "local";
-
-export type Association = {
+export type PublicAssociation = {
   id: string;
   wordId: string;
   textHe: string;
-  baseScore: number;
-  localDeltaScore: number;
-  source: AssociationSource;
+  createdByUserId: string;
   createdAt: string;
+  updatedAt: string;
+  likeCount: number;
 };
 
+export type PrivateAssociation = {
+  id: string;
+  wordId: string;
+  textHe: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AssociationMeta = {
+  isLikedByMe: boolean;
+  isSavedByMe: boolean;
+};
+
+export type PublicAssociationView = PublicAssociation & AssociationMeta;
+
 export type User = {
+  id: string;
   email: string;
   passwordHash: string;
   createdAt: string;
 };
 
 export type Session = {
-  email: string;
+  user: {
+    id: string;
+    email?: string;
+  };
   token: string;
 };
 
