@@ -46,3 +46,17 @@ app-example
 .vscode/launch.json
 
 .vscode/tasks.json
+
+# generated reports
+scripts/*_report.json
+scripts/*.log
+
+# env
+.env
+.env.*
+
+# Codex action summaries (generated)
+docs/codex/
+
+# Editor swap files
+*.swp

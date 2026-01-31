@@ -1,2 +1,2 @@
 export { GROUPS } from "./groups";
-export { WORDS } from "./words";
+export { WORDS, WORD_BY_ID } from "./words";

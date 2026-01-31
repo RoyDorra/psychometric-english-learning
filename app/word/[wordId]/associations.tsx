@@ -1,119 +1,120 @@
 import { useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { Association } from "@/src/domain/types";
-import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import AppText from "@/components/AppText";
 import EnglishText from "@/components/EnglishText";
 import PrimaryButton from "@/components/PrimaryButton";
 import Screen from "@/components/Screen";
 import TextField from "@/components/TextField";
+import { PrivateAssociation, PublicAssociationView } from "@/src/domain/types";
 import { useAssociations } from "@/src/hooks/useAssociations";
 import { useWords } from "@/src/hooks/useWords";
 import { colors, radius, spacing } from "@/src/ui/theme";
+
+type TabKey = "saved" | "public" | "private";
+type AddMode = "public" | "private";
 
 export default function WordAssociationsScreen() {
   const params = useLocalSearchParams<{ wordId?: string | string[] }>();
   const wordId = Array.isArray(params.wordId) ? params.wordId[0] : params.wordId;
   const { getWord } = useWords();
-  const { list, add, vote, unvote, remove, syncing, refresh, hasVoted } =
-    useAssociations(wordId);
+  const {
+    publicList,
+    savedList,
+    privateList,
+    addPublic,
+    addPrivate,
+    toggleLike,
+    toggleSave,
+    deletePrivate,
+    refresh,
+    loading,
+  } = useAssociations(wordId);
   const [text, setText] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [addMode, setAddMode] = useState<AddMode>("public");
+  const [activeTab, setActiveTab] = useState<TabKey>("public");
+  const [submitting, setSubmitting] = useState(false);
 
   const word = wordId ? getWord(wordId) : null;
-  const canSave = text.trim().length > 0 && !saving;
-  const sortedList = useMemo(() => {
-    return [...list].sort(
-      (a, b) =>
-        b.baseScore + (b.localDeltaScore ?? 0) -
-        (a.baseScore + (a.localDeltaScore ?? 0))
-    );
-  }, [list]);
+  const canSubmit = Boolean(text.trim()) && !submitting && Boolean(wordId);
+
+  const isPrivateTab = activeTab === "private";
+  const publicData = useMemo(
+    () => (activeTab === "saved" ? savedList : publicList),
+    [activeTab, publicList, savedList],
+  );
 
   const handleAdd = async () => {
     if (!wordId || !text.trim()) return;
-    setSaving(true);
-    await add(wordId, text.trim());
-    setText("");
-    setSelectedId(null);
-    setSaving(false);
-  };
-
-  const handleSelectAssociation = (itemId: string, value: string) => {
-    setSelectedId((prev) => (prev === itemId ? null : itemId));
-    setText(value);
-  };
-
-  const handleTextChange = (value: string) => {
-    setText(value);
-    if (selectedId) {
-      setSelectedId(null);
+    setSubmitting(true);
+    try {
+      if (addMode === "public") {
+        await addPublic(wordId, text);
+        setActiveTab("public");
+      } else {
+        await addPrivate(wordId, text);
+        setActiveTab("private");
+      }
+      setText("");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const renderAssociation = ({ item }: { item: Association }) => {
-    const score = item.baseScore + (item.localDeltaScore ?? 0);
-    const isSelected = selectedId === item.id;
-    const voted = hasVoted(item.id);
+  const renderPublicAssociation = ({ item }: { item: PublicAssociationView }) => {
+    const liked = item.isLikedByMe;
+    const saved = item.isSavedByMe;
+    const isSavedTab = activeTab === "saved";
+    const saveLabel = isSavedTab ? "הסר" : saved ? "✔︎ נשמר" : "+ שמור";
     return (
-      <View style={styles.association}>
+      <View style={styles.card}>
         <View style={{ flex: 1, gap: spacing.xs }}>
           <AppText style={styles.associationText}>{item.textHe}</AppText>
-          <View style={styles.metaRow}>
-            <AppText style={styles.score}>ציון: {score}</AppText>
-            {item.source === "local" ? (
-              <AppText style={styles.badge}>מקומי</AppText>
-            ) : null}
-          </View>
-        </View>
-        <View style={styles.voteRow}>
-          <TouchableOpacity
-            onPress={() =>
-              voted
-                ? unvote(item.wordId, item.id)
-                : vote(item.wordId, item.id, 1)
-            }
-            style={[styles.voteBtn, voted && styles.voteActive]}
-            hitSlop={8}
-          >
-            <AppText style={styles.voteEmoji}>👍</AppText>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.manageRow}>
-          <TouchableOpacity
-            onPress={() => handleSelectAssociation(item.id, item.textHe)}
-            style={[
-              styles.manageBtn,
-              isSelected && styles.manageBtnActive,
-            ]}
-          >
-            <AppText
-              style={[
-                styles.manageText,
-                isSelected && styles.manageTextActive,
-              ]}
-            >
-              {isSelected ? "נבחר" : "בחר"}
-            </AppText>
-          </TouchableOpacity>
-          {item.source === "local" ? (
-            <TouchableOpacity
-              onPress={async () => {
-                if (!wordId) return;
-                await remove(wordId, item.id);
-                if (selectedId === item.id) {
-                  setSelectedId(null);
-                }
-              }}
-              style={[styles.manageBtn, styles.deleteBtn]}
-            >
-              <AppText style={[styles.manageText, styles.deleteText]}>
-                מחק
-              </AppText>
-            </TouchableOpacity>
+          {!isSavedTab && saved ? (
+            <AppText style={styles.savedBadge}>נשמר</AppText>
           ) : null}
         </View>
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            style={[
+              styles.iconButton,
+              liked && styles.iconButtonActive,
+            ]}
+            onPress={() => wordId && toggleLike(wordId, item.id)}
+          >
+            <AppText style={styles.iconLabel}>👍 {item.likeCount}</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.iconButton,
+              saved && styles.iconButtonSaved,
+            ]}
+            onPress={() => wordId && toggleSave(wordId, item.id)}
+          >
+            <AppText style={styles.iconLabel}>{saveLabel}</AppText>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
+  const renderPrivateAssociation = ({ item }: { item: PrivateAssociation }) => {
+    return (
+      <View style={styles.card}>
+        <View style={{ flex: 1 }}>
+          <AppText style={styles.associationText}>{item.textHe}</AppText>
+        </View>
+        <TouchableOpacity
+          style={[styles.iconButton, styles.deleteButton]}
+          onPress={() => wordId && deletePrivate(wordId, item.id)}
+        >
+          <AppText style={[styles.iconLabel, styles.deleteText]}>מחק</AppText>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -126,60 +127,166 @@ export default function WordAssociationsScreen() {
     );
   }
 
+  const publicEmptyText =
+    activeTab === "saved"
+      ? "עדיין לא שמרתם אסוציאציות למילה הזאת."
+      : "עדיין אין אסוציאציות ציבוריות. הוסיפו את הראשונה!";
+  const privateEmptyText = "עדיין אין אסוציאציות פרטיות. הוסיפו אחת!";
+
+  const listHeader = (
+    <View style={{ gap: spacing.l, marginBottom: spacing.m }}>
+      <View style={styles.headerCard}>
+        <AppText style={styles.title}>אסוציאציות עבור</AppText>
+        <EnglishText style={styles.english}>{word.en}</EnglishText>
+        <AppText style={styles.hebrew}>{word.he.join(" / ")}</AppText>
+      </View>
+
+      <View style={styles.addCard}>
+        <TextField
+          label="הוסיפו אסוציאציה"
+          value={text}
+          onChangeText={setText}
+          placeholder="רמז קצר שיעזור לזכור"
+          returnKeyType="done"
+          onSubmitEditing={handleAdd}
+        />
+        <View style={styles.modeRow}>
+          <AppText style={styles.modeLabel}>שיוך:</AppText>
+          <View style={styles.modeToggle}>
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                addMode === "public" && styles.modeButtonActive,
+              ]}
+              onPress={() => setAddMode("public")}
+            >
+              <AppText
+                style={[
+                  styles.modeText,
+                  addMode === "public" && styles.modeTextActive,
+                ]}
+              >
+                ציבורי
+              </AppText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                addMode === "private" && styles.modeButtonActive,
+              ]}
+              onPress={() => setAddMode("private")}
+            >
+              <AppText
+                style={[
+                  styles.modeText,
+                  addMode === "private" && styles.modeTextActive,
+                ]}
+              >
+                פרטי
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <PrimaryButton
+          title="הוסף"
+          onPress={handleAdd}
+          disabled={!canSubmit}
+          loading={submitting}
+        />
+      </View>
+
+      <View style={styles.tabsRow}>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === "saved" && styles.tabButtonActive,
+          ]}
+          onPress={() => setActiveTab("saved")}
+        >
+          <AppText
+            style={[
+              styles.tabText,
+              activeTab === "saved" && styles.tabTextActive,
+            ]}
+          >
+            שמור
+          </AppText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === "public" && styles.tabButtonActive,
+          ]}
+          onPress={() => setActiveTab("public")}
+        >
+          <AppText
+            style={[
+              styles.tabText,
+              activeTab === "public" && styles.tabTextActive,
+            ]}
+          >
+            כללי
+          </AppText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === "private" && styles.tabButtonActive,
+          ]}
+          onPress={() => setActiveTab("private")}
+        >
+          <AppText
+            style={[
+              styles.tabText,
+              activeTab === "private" && styles.tabTextActive,
+            ]}
+          >
+            פרטי
+          </AppText>
+        </TouchableOpacity>
+      </View>
+
+      {loading ? (
+        <AppText style={{ color: colors.muted }}>טוען...</AppText>
+      ) : null}
+    </View>
+  );
+
   return (
     <Screen withPadding>
-      <FlatList
-        data={sortedList}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ gap: spacing.s, paddingBottom: spacing.xl }}
-        style={{ flex: 1 }}
-        ListHeaderComponent={
-          <View style={{ gap: spacing.l, marginBottom: spacing.m }}>
-            <View style={styles.headerCard}>
-              <AppText style={styles.title}>אסוציאציות עבור</AppText>
-              <EnglishText style={styles.english}>{word.english}</EnglishText>
-              <AppText style={styles.hebrew}>
-                {word.hebrewTranslations.join(" / ")}
-              </AppText>
-            </View>
-
-            <View style={styles.addCard}>
-              <TextField
-                label="הוסיפו אסוציאציה"
-                value={text}
-                onChangeText={handleTextChange}
-                placeholder="רמז קצר שיעזור לזכור"
-                returnKeyType="done"
-                onSubmitEditing={handleAdd}
-              />
-              <AppText style={styles.helper}>
-                כתבו מילה, תמונה מנטלית או קישור אישי שמקל לזכור את המילה.
-              </AppText>
-              <PrimaryButton
-                title="שמור אסוציאציה"
-                onPress={handleAdd}
-                disabled={!canSave}
-                loading={saving}
-              />
-            </View>
-
-            <View style={styles.listHeader}>
-              <AppText style={styles.subtitle}>האסוציאציות שלי</AppText>
-              <TouchableOpacity onPress={refresh} disabled={syncing}>
-                <AppText style={styles.refreshText}>
-                  {syncing ? "מסנכרן..." : "רענן"}
-                </AppText>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-        ListEmptyComponent={
-          <AppText style={{ color: colors.muted }}>
-            עדיין אין אסוציאציות. הוסיפו את הראשונה!
-          </AppText>
-        }
-        renderItem={renderAssociation}
-      />
+      {isPrivateTab ? (
+        <FlatList<PrivateAssociation>
+          data={privateList}
+          keyExtractor={(item) => item.id}
+          renderItem={renderPrivateAssociation}
+          contentContainerStyle={{ gap: spacing.s, paddingBottom: spacing.xl }}
+          style={{ flex: 1 }}
+          ListHeaderComponent={listHeader}
+          ListEmptyComponent={
+            <AppText style={{ color: colors.muted }}>
+              {privateEmptyText}
+            </AppText>
+          }
+          refreshing={loading}
+          onRefresh={() => refresh(wordId)}
+        />
+      ) : (
+        <FlatList<PublicAssociationView>
+          data={publicData}
+          keyExtractor={(item) => item.id}
+          renderItem={renderPublicAssociation}
+          contentContainerStyle={{ gap: spacing.s, paddingBottom: spacing.xl }}
+          style={{ flex: 1 }}
+          ListHeaderComponent={listHeader}
+          ListEmptyComponent={
+            <AppText style={{ color: colors.muted }}>
+              {publicEmptyText}
+            </AppText>
+          }
+          refreshing={loading}
+          onRefresh={() => refresh(wordId)}
+        />
+      )}
     </Screen>
   );
 }
@@ -212,25 +319,63 @@ const styles = StyleSheet.create({
   hebrew: {
     color: colors.muted,
   },
-  helper: {
+  modeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.s,
+  },
+  modeLabel: {
     color: colors.muted,
   },
-  listHeader: {
+  modeToggle: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    gap: spacing.xs,
   },
-  subtitle: {
-    fontSize: 16,
+  modeButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.m,
+    borderRadius: radius.s,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  modeButtonActive: {
+    borderColor: colors.primary,
+    backgroundColor: "#e0f2fe",
+  },
+  modeText: {
     fontWeight: "700",
   },
-  refreshText: {
+  modeTextActive: {
     color: colors.primary,
-    fontWeight: "700",
   },
-  association: {
+  tabsRow: {
     flexDirection: "row",
-    gap: spacing.m,
+    backgroundColor: colors.surface,
+    borderRadius: radius.m,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: "hidden",
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: spacing.s,
+  },
+  tabButtonActive: {
+    backgroundColor: "#e0f2fe",
+  },
+  tabText: {
+    fontWeight: "700",
+    color: colors.muted,
+  },
+  tabTextActive: {
+    color: colors.primary,
+  },
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.s,
     padding: spacing.m,
     backgroundColor: colors.surface,
     borderRadius: radius.m,
@@ -240,70 +385,40 @@ const styles = StyleSheet.create({
   associationText: {
     fontWeight: "600",
   },
-  metaRow: {
-    flexDirection: "row",
-    gap: spacing.s,
-    alignItems: "center",
-  },
-  score: {
-    color: colors.muted,
-  },
-  badge: {
-    backgroundColor: "#e0f2fe",
-    paddingHorizontal: spacing.s,
-    paddingVertical: 2,
-    borderRadius: radius.s,
-    color: colors.primary,
-    fontWeight: "700",
-  },
-  voteRow: {
-    flexDirection: "column",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
-  voteBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  voteActive: {
-    borderColor: "#16a34a",
-    backgroundColor: "#dcfce7",
-  },
-  voteEmoji: {
-    fontSize: 18,
-  },
-  manageRow: {
+  actionsRow: {
     flexDirection: "column",
     gap: spacing.xs,
     alignItems: "flex-start",
   },
-  manageBtn: {
+  iconButton: {
     paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.s,
+    paddingHorizontal: spacing.m,
     borderRadius: radius.s,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  manageBtnActive: {
+  iconButtonActive: {
+    borderColor: "#16a34a",
+    backgroundColor: "#dcfce7",
+  },
+  iconButtonSaved: {
     borderColor: colors.primary,
     backgroundColor: "#e0f2fe",
   },
-  manageText: {
-    fontSize: 12,
+  iconLabel: {
     fontWeight: "700",
   },
-  manageTextActive: {
+  savedBadge: {
+    backgroundColor: "#e0f2fe",
     color: colors.primary,
+    alignSelf: "flex-start",
+    paddingHorizontal: spacing.s,
+    paddingVertical: 2,
+    borderRadius: radius.s,
+    fontWeight: "700",
   },
-  deleteBtn: {
+  deleteButton: {
     borderColor: colors.danger,
     backgroundColor: "#fee2e2",
   },
