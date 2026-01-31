@@ -16,7 +16,10 @@ import { colors, radius, spacing } from "@/src/ui/theme";
 
 function parseGroups(raw?: string) {
   if (!raw) return [];
-  return raw.split(",").map((g) => g.trim()).filter(Boolean);
+  return raw
+    .split(",")
+    .map((g) => g.trim())
+    .filter(Boolean);
 }
 
 function parseStatuses(raw?: string): WordStatus[] {
@@ -33,25 +36,26 @@ export default function ReviewPlayerScreen() {
 
   const filterGroups = useMemo(
     () => parseGroups(params.groups),
-    [params.groups]
+    [params.groups],
   );
   const rawFilterStatuses = useMemo(
     () => parseStatuses(params.statuses),
-    [params.statuses]
+    [params.statuses],
   );
   const filterStatuses = useMemo(
-    () => (rawFilterStatuses.length ? rawFilterStatuses : DEFAULT_REVIEW_STATUSES),
-    [rawFilterStatuses]
+    () =>
+      rawFilterStatuses.length ? rawFilterStatuses : DEFAULT_REVIEW_STATUSES,
+    [rawFilterStatuses],
   );
 
   const targetGroups = useMemo(
     () => (filterGroups.length ? filterGroups : groups.map((g) => g.id)),
-    [filterGroups, groups]
+    [filterGroups, groups],
   );
 
   const words = useMemo(
     () => targetGroups.flatMap((id) => getWordsForGroup(id)),
-    [targetGroups, getWordsForGroup]
+    [targetGroups, getWordsForGroup],
   );
 
   const { current, next, prev, total, list, resetIndex } = useReviewPlayer({
@@ -66,7 +70,7 @@ export default function ReviewPlayerScreen() {
   const filterGroupsKey = useMemo(() => filterGroups.join(","), [filterGroups]);
   const filterStatusesKey = useMemo(
     () => filterStatuses.join(","),
-    [filterStatuses]
+    [filterStatuses],
   );
 
   useEffect(() => {
@@ -76,8 +80,7 @@ export default function ReviewPlayerScreen() {
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-        onMoveShouldSetPanResponder: (_, gesture) =>
-          Math.abs(gesture.dx) > 20,
+        onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 20,
         onPanResponderRelease: (_, gesture) => {
           if (gesture.dx < -30) {
             next();
@@ -88,10 +91,12 @@ export default function ReviewPlayerScreen() {
           }
         },
       }),
-    [next, prev]
+    [next, prev],
   );
 
-  const currentStatus = current ? statuses[current.id] ?? "UNMARKED" : "UNMARKED";
+  const currentStatus = current
+    ? (statuses[current.id] ?? "UNMARKED")
+    : "UNMARKED";
 
   return (
     <Screen withPadding>
@@ -112,10 +117,10 @@ export default function ReviewPlayerScreen() {
             style={styles.card}
             onPress={() => setShowTranslation((v) => !v)}
           >
-            <EnglishText style={styles.english}>{current.english}</EnglishText>
+            <EnglishText style={styles.english}>{current.en}</EnglishText>
             {showTranslation ? (
               <AppText style={styles.translation}>
-                {current.hebrewTranslations.join(" / ")}
+                {current.he.join(" / ")}
               </AppText>
             ) : (
               <AppText style={styles.hint}>הקישו כדי להציג תרגום</AppText>
@@ -132,8 +137,20 @@ export default function ReviewPlayerScreen() {
           />
 
           <View style={styles.navRow}>
-            <PrimaryButton title="הקודם" onPress={() => { prev(); setShowTranslation(false); }} />
-            <PrimaryButton title="הבא" onPress={() => { next(); setShowTranslation(false); }} />
+            <PrimaryButton
+              title="הקודם"
+              onPress={() => {
+                prev();
+                setShowTranslation(false);
+              }}
+            />
+            <PrimaryButton
+              title="הבא"
+              onPress={() => {
+                next();
+                setShowTranslation(false);
+              }}
+            />
           </View>
 
           <PrimaryButton

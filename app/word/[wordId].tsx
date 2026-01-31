@@ -12,11 +12,13 @@ import { radius, spacing } from "@/src/ui/theme";
 export default function WordDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ wordId?: string | string[] }>();
-  const wordId = Array.isArray(params.wordId) ? params.wordId[0] : params.wordId;
+  const wordId = Array.isArray(params.wordId)
+    ? params.wordId[0]
+    : params.wordId;
   const { getWord, statuses, updateStatus } = useWords();
 
   const word = wordId ? getWord(wordId) : null;
-  const status = word ? statuses[word.id] ?? "UNMARKED" : "UNMARKED";
+  const status = word ? (statuses[word.id] ?? "UNMARKED") : "UNMARKED";
 
   if (!word) {
     return (
@@ -29,9 +31,9 @@ export default function WordDetailsScreen() {
   return (
     <Screen withPadding>
       <View style={styles.card}>
-        <EnglishText style={styles.english}>{word.english}</EnglishText>
+        <EnglishText style={styles.english}>{word.en}</EnglishText>
         <View style={{ gap: spacing.xs }}>
-          {word.hebrewTranslations.map((t) => (
+          {word.he.map((t) => (
             <AppText key={t} style={styles.translation}>
               {t}
             </AppText>
@@ -41,7 +43,10 @@ export default function WordDetailsScreen() {
 
       <View style={{ gap: spacing.s }}>
         <AppText style={{ fontWeight: "700" }}>סיווג</AppText>
-        <StatusSelector value={status} onChange={(next) => updateStatus(word.id, next)} />
+        <StatusSelector
+          value={status}
+          onChange={(next) => updateStatus(word.id, next)}
+        />
       </View>
 
       <PrimaryButton

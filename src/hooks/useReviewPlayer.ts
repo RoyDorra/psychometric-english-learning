@@ -8,13 +8,28 @@ type Options = {
 };
 
 export function useReviewPlayer({ words, statuses, filters }: Options) {
+  const allowedGroups = useMemo(() => {
+    const set = new Set<number>();
+    for (const id of filters.groups) {
+      if (typeof id === "number") {
+        set.add(id);
+        continue;
+      }
+      const match = String(id).match(/\d+/);
+      if (!match) continue;
+      const num = Number(match[0]);
+      if (Number.isFinite(num)) set.add(num);
+    }
+    return set;
+  }, [filters.groups]);
+
   const filtered = useMemo(() => {
     return words.filter((word) => {
-      if (!filters.groups.includes(word.groupId)) return false;
+      if (!allowedGroups.has(word.group)) return false;
       const status = statuses[word.id] ?? "UNMARKED";
       return filters.statuses.includes(status);
     });
-  }, [words, filters.groups, filters.statuses, statuses]);
+  }, [words, allowedGroups, filters.statuses, statuses]);
 
   const [index, setIndex] = useState(0);
 
@@ -22,7 +37,7 @@ export function useReviewPlayer({ words, statuses, filters }: Options) {
 
   const next = () => {
     setIndex((prev) =>
-      filtered.length === 0 ? 0 : (prev + 1) % filtered.length
+      filtered.length === 0 ? 0 : (prev + 1) % filtered.length,
     );
   };
 
@@ -30,11 +45,18 @@ export function useReviewPlayer({ words, statuses, filters }: Options) {
     setIndex((prev) =>
       filtered.length === 0
         ? 0
-        : (prev - 1 + filtered.length) % filtered.length
+        : (prev - 1 + filtered.length) % filtered.length,
     );
   };
 
   const resetIndex = () => setIndex(0);
 
-  return { current, next, prev, total: filtered.length, list: filtered, resetIndex };
+  return {
+    current,
+    next,
+    prev,
+    total: filtered.length,
+    list: filtered,
+    resetIndex,
+  };
 }

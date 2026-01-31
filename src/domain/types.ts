@@ -2,9 +2,10 @@ export type WordStatus = "UNMARKED" | "DONT_KNOW" | "PARTIAL" | "KNOW";
 
 export type Word = {
   id: string;
-  groupId: string;
-  english: string;
-  hebrewTranslations: string[];
+  en: string;
+  he: readonly string[];
+  group: number;
+  index: number;
 };
 
 export type Group = {
