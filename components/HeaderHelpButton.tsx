@@ -15,7 +15,7 @@ import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function HeaderHelpButton() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [visible, setVisible] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const [loadingAction, setLoadingAction] = useState<"logout" | "reset" | null>(null);
@@ -53,11 +53,15 @@ export default function HeaderHelpButton() {
 
   const handleReset = async () => {
     setLoadingAction("reset");
-    await clearAppStorage();
-    setLoadingAction(null);
-    setVisible(false);
-    setConfirmReset(false);
-    router.replace("/(auth)/login");
+    try {
+      await clearAppStorage(user?.id);
+      await logout();
+      router.replace("/(auth)/login");
+    } finally {
+      setLoadingAction(null);
+      setVisible(false);
+      setConfirmReset(false);
+    }
   };
 
   return (
