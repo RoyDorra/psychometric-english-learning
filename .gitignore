@@ -60,3 +60,7 @@ docs/codex/
 
 # Editor swap files
 *.swp
+
+# local agent/codex tooling (skills)
+.agents/
+.codex/
