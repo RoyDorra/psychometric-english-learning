@@ -1,11 +1,11 @@
 export const STORAGE_KEYS = {
   USERS: "@pel/users",
   SESSION: "@pel/session",
-  STATUSES: "@pel/statuses",
-  HELP: "@pel/help",
-  STUDY_PREFS: "@pel/studyPrefs",
-  REVIEW_PREFS: "@pel/reviewPrefs",
+  STATUSES: (userId: string) => `@pel/statuses:${userId}`,
+  HELP: (userId: string) => `@pel/help:${userId}`,
+  STUDY_PREFS: (userId: string) => `@pel/studyPrefs:${userId}`,
+  REVIEW_PREFS: (userId: string) => `@pel/reviewPrefs:${userId}`,
   ASSOCIATIONS: "@pel/associations",
-  ASSOCIATION_VOTES: "@pel/associationVotes",
+  ASSOCIATION_VOTES: (userId: string) => `@pel/associationVotes:${userId}`,
   LAST_SYNC: "@pel/lastSync",
 };

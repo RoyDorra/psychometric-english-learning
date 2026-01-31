@@ -3,7 +3,7 @@ import { bootstrap } from "../core/bootstrap";
 import { Session, User } from "../domain/types";
 import {
   getSession,
-  getUserByEmail,
+  getUserById,
   loginUser,
   logoutUser,
   registerUser,
@@ -29,8 +29,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     (async () => {
       await bootstrap();
       const existingSession = await getSession();
-      if (existingSession) {
-        const existingUser = await getUserByEmail(existingSession.email);
+      const existingUserId = existingSession?.user?.id;
+      if (existingUserId) {
+        const existingUser = await getUserById(existingUserId);
         if (existingUser) {
           setSession(existingSession);
           setUser(existingUser);

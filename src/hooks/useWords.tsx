@@ -53,7 +53,7 @@ const WordContext = createContext<WordContextValue | undefined>(undefined);
 
 export function WordProvider({ children }: PropsWithChildren) {
   const { session } = useAuth();
-  const email = session?.email;
+  const userId = session?.user.id;
   const groups = useMemo(() => getGroups(), []);
 
   const [statuses, setStatuses] = useState<Record<string, WordStatus>>({});
@@ -71,7 +71,7 @@ export function WordProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     let active = true;
     (async () => {
-      if (!email) {
+      if (!userId) {
         setStatuses({});
         setHelpSeen(false);
         setStudyPrefsState({
@@ -88,10 +88,10 @@ export function WordProvider({ children }: PropsWithChildren) {
       setLoading(true);
       const [loadedStatuses, helpPref, studyPrefs, reviewPrefs] =
         await Promise.all([
-          getStatuses(email),
-          getHelpPreference(email),
-          getStudyPreferences(email),
-          getReviewFilters(email),
+          getStatuses(userId),
+          getHelpPreference(userId),
+          getStudyPreferences(userId),
+          getReviewFilters(userId),
         ]);
       if (!active) return;
       setStatuses(loadedStatuses);
@@ -103,40 +103,40 @@ export function WordProvider({ children }: PropsWithChildren) {
     return () => {
       active = false;
     };
-  }, [email]);
+  }, [userId]);
 
   const updateStatus = useCallback(
     async (wordId: string, status: WordStatus) => {
-      if (!email) return;
+      if (!userId) return;
       setStatuses((prev) => ({ ...prev, [wordId]: status }));
-      await setStatus(email, wordId, status);
+      await setStatus(userId, wordId, status);
     },
-    [email],
+    [userId],
   );
 
   const updateStudyPreferences = useCallback(
     async (prefs: StudyPreferences) => {
-      if (!email) return;
+      if (!userId) return;
       setStudyPrefsState(prefs);
-      await setStudyPreferences(email, prefs);
+      await setStudyPreferences(userId, prefs);
     },
-    [email],
+    [userId],
   );
 
   const updateReviewFilters = useCallback(
     async (filters: ReviewFilters) => {
-      if (!email) return;
+      if (!userId) return;
       setReviewFiltersState(filters);
-      await setReviewFilters(email, filters);
+      await setReviewFilters(userId, filters);
     },
-    [email],
+    [userId],
   );
 
   const markHelpSeen = useCallback(async () => {
-    if (!email) return;
+    if (!userId) return;
     setHelpSeen(true);
-    await setHelpPreference(email, { seen: true });
-  }, [email]);
+    await setHelpPreference(userId, { seen: true });
+  }, [userId]);
 
   const value = useMemo(
     () => ({

@@ -38,7 +38,7 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
   const [associations, setAssociations] = useState<Record<string, Association[]>>({});
   const [votes, setVotes] = useState<Record<string, 1 | -1>>({});
   const [syncing, setSyncing] = useState(false);
-  const voterId = session?.email ?? "guest";
+  const userId = session?.user.id ?? "guest";
 
   const load = useCallback(async () => {
     const map = await getAssociationIndex();
@@ -46,9 +46,9 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
   }, []);
 
   const loadVotes = useCallback(async () => {
-    const map = await getUserAssociationVotes(voterId);
+    const map = await getUserAssociationVotes(userId);
     setVotes(map);
-  }, [voterId]);
+  }, [userId]);
 
   const refresh = useCallback(async () => {
     setSyncing(true);
@@ -79,24 +79,24 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
     if (votes[associationId]) {
       return associations[wordId] ?? [];
     }
-    const list = await voteAssociation(wordId, associationId, delta, voterId);
+    const list = await voteAssociation(wordId, associationId, delta, userId);
     setAssociations((prev) => ({ ...prev, [wordId]: list }));
     setVotes((prev) => ({ ...prev, [associationId]: delta }));
     return list;
-  }, [associations, votes, voterId]);
+  }, [associations, votes, userId]);
 
   const unvote = useCallback(async (wordId: string, associationId: string) => {
     if (!votes[associationId]) {
       return associations[wordId] ?? [];
     }
-    const list = await removeAssociationVote(wordId, associationId, voterId);
+    const list = await removeAssociationVote(wordId, associationId, userId);
     setAssociations((prev) => ({ ...prev, [wordId]: list }));
     setVotes((prev) => {
       const { [associationId]: _, ...rest } = prev;
       return rest;
     });
     return list;
-  }, [associations, votes, voterId]);
+  }, [associations, votes, userId]);
 
   const remove = useCallback(async (wordId: string, associationId: string) => {
     const list = await removeLocalAssociation(wordId, associationId);
