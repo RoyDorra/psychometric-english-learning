@@ -3,7 +3,7 @@ import { STORAGE_KEYS } from "../storage/keys";
 import { getJson, setJson } from "../storage/storage";
 
 type AssociationState = Record<string, Association[]>;
-type AssociationVotesState = Record<string, Record<string, 1 | -1>>;
+type AssociationVotesState = Record<string, 1 | -1>;
 
 function sortAssociations(list: Association[]) {
   return [...list].sort(
@@ -22,12 +22,12 @@ async function saveState(state: AssociationState) {
   await setJson(STORAGE_KEYS.ASSOCIATIONS, state);
 }
 
-async function getVotesState() {
-  return getJson<AssociationVotesState>(STORAGE_KEYS.ASSOCIATION_VOTES, {});
+async function getVotesState(userId: string) {
+  return getJson<AssociationVotesState>(STORAGE_KEYS.ASSOCIATION_VOTES(userId), {});
 }
 
-async function saveVotesState(state: AssociationVotesState) {
-  await setJson(STORAGE_KEYS.ASSOCIATION_VOTES, state);
+async function saveVotesState(userId: string, state: AssociationVotesState) {
+  await setJson(STORAGE_KEYS.ASSOCIATION_VOTES(userId), state);
 }
 
 export async function getAssociations(wordId: string) {
@@ -76,15 +76,13 @@ export async function voteAssociation(
   wordId: string,
   associationId: string,
   delta: 1 | -1,
-  voterId?: string
+  userId: string
 ) {
   const state = await getState();
   const list = state[wordId] ?? [];
-  const votesState = await getVotesState();
-  const voterKey = voterId ?? "guest";
-  const userVotes = votesState[voterKey] ?? {};
+  const votesState = await getVotesState(userId);
 
-  if (userVotes[associationId]) {
+  if (votesState[associationId]) {
     return sortAssociations(list);
   }
 
@@ -95,22 +93,20 @@ export async function voteAssociation(
   );
   state[wordId] = sortAssociations(updated);
   await saveState(state);
-  votesState[voterKey] = { ...userVotes, [associationId]: delta };
-  await saveVotesState(votesState);
+  const updatedVotes = { ...votesState, [associationId]: delta };
+  await saveVotesState(userId, updatedVotes);
   return state[wordId];
 }
 
 export async function removeAssociationVote(
   wordId: string,
   associationId: string,
-  voterId?: string
+  userId: string
 ) {
   const state = await getState();
   const list = state[wordId] ?? [];
-  const votesState = await getVotesState();
-  const voterKey = voterId ?? "guest";
-  const userVotes = votesState[voterKey] ?? {};
-  const previous = userVotes[associationId];
+  const votesState = await getVotesState(userId);
+  const previous = votesState[associationId];
 
   if (!previous) {
     return sortAssociations(list);
@@ -121,11 +117,10 @@ export async function removeAssociationVote(
       ? { ...association, localDeltaScore: (association.localDeltaScore ?? 0) - previous }
       : association
   );
-  const { [associationId]: _, ...rest } = userVotes;
-  votesState[voterKey] = rest;
+  const { [associationId]: _, ...rest } = votesState;
   state[wordId] = sortAssociations(updated);
   await saveState(state);
-  await saveVotesState(votesState);
+  await saveVotesState(userId, rest);
   return state[wordId];
 }
 
@@ -148,7 +143,6 @@ export async function getAssociationIndex() {
   return getState();
 }
 
-export async function getUserAssociationVotes(voterId: string) {
-  const state = await getVotesState();
-  return state[voterId] ?? {};
+export async function getUserAssociationVotes(userId: string) {
+  return getVotesState(userId);
 }

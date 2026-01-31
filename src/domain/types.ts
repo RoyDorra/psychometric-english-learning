@@ -27,13 +27,17 @@ export type Association = {
 };
 
 export type User = {
+  id: string;
   email: string;
   passwordHash: string;
   createdAt: string;
 };
 
 export type Session = {
-  email: string;
+  user: {
+    id: string;
+    email?: string;
+  };
   token: string;
 };
 
