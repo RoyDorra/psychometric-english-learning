@@ -1,0 +1,1 @@
+-- Placeholder seed file; database seeding is handled by scripts/seed_words_catalog_to_supabase.ts

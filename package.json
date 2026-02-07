@@ -21,7 +21,9 @@
     "check:local": "npm run lint && npx tsc -p tsconfig.json --noEmit && npm run test:fast",
     "check:full": "npm run lint && npx tsc -p tsconfig.json --noEmit && npm run test:ci",
     "words:assign-uuids:build": "tsc -p scripts/tsconfig.json",
-    "words:assign-uuids": "npm run words:assign-uuids:build && node scripts/dist/assign_word_uuids.js"
+    "words:assign-uuids": "npm run words:assign-uuids:build && node scripts/dist/assign_word_uuids.js",
+    "supabase:seed:words-catalog:build": "tsc -p scripts/tsconfig.json",
+    "supabase:seed:words-catalog": "npm run supabase:seed:words-catalog:build && ./scripts/run_seed_words_catalog.sh"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
