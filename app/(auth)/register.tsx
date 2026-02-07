@@ -57,7 +57,7 @@ export default function RegisterScreen() {
         <View style={{ gap: spacing.s }}>
           <AppText style={{ fontSize: 22, fontWeight: "700" }}>הרשמה</AppText>
           <AppText style={{ color: "#475569" }}>
-            צרו פרופיל כדי לשמור את התקדמות הלמידה במכשיר
+            צרו פרופיל כדי לשמור התקדמות בענן ולסנכרן בין מכשירים
           </AppText>
         </View>
 

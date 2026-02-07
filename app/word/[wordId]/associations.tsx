@@ -19,6 +19,13 @@ import { colors, radius, spacing } from "@/src/ui/theme";
 type TabKey = "saved" | "public" | "private";
 type AddMode = "public" | "private";
 
+function toErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+  return fallback;
+}
+
 export default function WordAssociationsScreen() {
   const params = useLocalSearchParams<{ wordId?: string | string[] }>();
   const wordId = Array.isArray(params.wordId) ? params.wordId[0] : params.wordId;
@@ -39,6 +46,7 @@ export default function WordAssociationsScreen() {
   const [addMode, setAddMode] = useState<AddMode>("public");
   const [activeTab, setActiveTab] = useState<TabKey>("public");
   const [submitting, setSubmitting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const word = wordId ? getWord(wordId) : null;
   const canSubmit = Boolean(text.trim()) && !submitting && Boolean(wordId);
@@ -49,9 +57,22 @@ export default function WordAssociationsScreen() {
     [activeTab, publicList, savedList],
   );
 
+  const runAssociationAction = async (
+    action: () => Promise<void>,
+    fallbackMessage: string,
+  ) => {
+    setActionError(null);
+    try {
+      await action();
+    } catch (error) {
+      setActionError(toErrorMessage(error, fallbackMessage));
+    }
+  };
+
   const handleAdd = async () => {
     if (!wordId || !text.trim()) return;
     setSubmitting(true);
+    setActionError(null);
     try {
       if (addMode === "public") {
         await addPublic(wordId, text);
@@ -61,6 +82,8 @@ export default function WordAssociationsScreen() {
         setActiveTab("private");
       }
       setText("");
+    } catch (error) {
+      setActionError(toErrorMessage(error, "שמירת האסוציאציה נכשלה"));
     } finally {
       setSubmitting(false);
     }
@@ -85,7 +108,13 @@ export default function WordAssociationsScreen() {
               styles.iconButton,
               liked && styles.iconButtonActive,
             ]}
-            onPress={() => wordId && toggleLike(wordId, item.id)}
+            onPress={() => {
+              if (!wordId) return;
+              void runAssociationAction(
+                () => toggleLike(wordId, item.id),
+                "עדכון הלייק נכשל",
+              );
+            }}
           >
             <AppText style={styles.iconLabel}>👍 {item.likeCount}</AppText>
           </TouchableOpacity>
@@ -94,7 +123,13 @@ export default function WordAssociationsScreen() {
               styles.iconButton,
               saved && styles.iconButtonSaved,
             ]}
-            onPress={() => wordId && toggleSave(wordId, item.id)}
+            onPress={() => {
+              if (!wordId) return;
+              void runAssociationAction(
+                () => toggleSave(wordId, item.id),
+                "עדכון השמירה נכשל",
+              );
+            }}
           >
             <AppText style={styles.iconLabel}>{saveLabel}</AppText>
           </TouchableOpacity>
@@ -111,7 +146,13 @@ export default function WordAssociationsScreen() {
         </View>
         <TouchableOpacity
           style={[styles.iconButton, styles.deleteButton]}
-          onPress={() => wordId && deletePrivate(wordId, item.id)}
+          onPress={() => {
+            if (!wordId) return;
+            void runAssociationAction(
+              () => deletePrivate(wordId, item.id),
+              "מחיקת האסוציאציה נכשלה",
+            );
+          }}
         >
           <AppText style={[styles.iconLabel, styles.deleteText]}>מחק</AppText>
         </TouchableOpacity>
@@ -249,6 +290,9 @@ export default function WordAssociationsScreen() {
       {loading ? (
         <AppText style={{ color: colors.muted }}>טוען...</AppText>
       ) : null}
+      {actionError ? (
+        <AppText style={styles.errorText}>{actionError}</AppText>
+      ) : null}
     </View>
   );
 
@@ -268,7 +312,12 @@ export default function WordAssociationsScreen() {
             </AppText>
           }
           refreshing={loading}
-          onRefresh={() => refresh(wordId)}
+          onRefresh={() => {
+            void runAssociationAction(
+              () => refresh(wordId),
+              "רענון האסוציאציות נכשל",
+            );
+          }}
         />
       ) : (
         <FlatList<PublicAssociationView>
@@ -284,7 +333,12 @@ export default function WordAssociationsScreen() {
             </AppText>
           }
           refreshing={loading}
-          onRefresh={() => refresh(wordId)}
+          onRefresh={() => {
+            void runAssociationAction(
+              () => refresh(wordId),
+              "רענון האסוציאציות נכשל",
+            );
+          }}
         />
       )}
     </Screen>
@@ -423,6 +477,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fee2e2",
   },
   deleteText: {
+    color: colors.danger,
+  },
+  errorText: {
     color: colors.danger,
   },
 });

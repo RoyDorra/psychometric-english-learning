@@ -34,6 +34,13 @@ import {
   DEFAULT_STUDY_STATUSES,
 } from "../domain/status";
 
+function toErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+  return fallback;
+}
+
 type WordContextValue = {
   statuses: Record<string, WordStatus>;
   groups: Group[];
@@ -47,6 +54,8 @@ type WordContextValue = {
   helpSeen: boolean;
   markHelpSeen: () => Promise<void>;
   loading: boolean;
+  error: string | null;
+  clearError: () => void;
 };
 
 const WordContext = createContext<WordContextValue | undefined>(undefined);
@@ -55,88 +64,154 @@ export function WordProvider({ children }: PropsWithChildren) {
   const { session } = useAuth();
   const userId = session?.user.id;
   const groups = useMemo(() => getGroups(), []);
+  const defaultStudyPreferences = useMemo<StudyPreferences>(
+    () => ({
+      chunkSize: DEFAULT_CHUNK_SIZE,
+      statuses: DEFAULT_STUDY_STATUSES,
+    }),
+    [],
+  );
+  const defaultReviewFilters = useMemo<ReviewFilters>(
+    () => ({
+      groups: groups.map((group) => group.id),
+      statuses: DEFAULT_REVIEW_STATUSES,
+    }),
+    [groups],
+  );
 
   const [statuses, setStatuses] = useState<Record<string, WordStatus>>({});
-  const [studyPreferences, setStudyPrefsState] = useState<StudyPreferences>({
-    chunkSize: DEFAULT_CHUNK_SIZE,
-    statuses: DEFAULT_STUDY_STATUSES,
-  });
-  const [reviewFilters, setReviewFiltersState] = useState<ReviewFilters>({
-    groups: getGroups().map((g) => g.id),
-    statuses: DEFAULT_REVIEW_STATUSES,
-  });
+  const [studyPreferences, setStudyPrefsState] =
+    useState<StudyPreferences>(defaultStudyPreferences);
+  const [reviewFilters, setReviewFiltersState] =
+    useState<ReviewFilters>(defaultReviewFilters);
   const [helpSeen, setHelpSeen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const resetLocalState = useCallback(() => {
+    setStatuses({});
+    setHelpSeen(false);
+    setStudyPrefsState(defaultStudyPreferences);
+    setReviewFiltersState(defaultReviewFilters);
+  }, [defaultReviewFilters, defaultStudyPreferences]);
 
   useEffect(() => {
     let active = true;
     (async () => {
       if (!userId) {
-        setStatuses({});
-        setHelpSeen(false);
-        setStudyPrefsState({
-          chunkSize: DEFAULT_CHUNK_SIZE,
-          statuses: DEFAULT_STUDY_STATUSES,
-        });
-        setReviewFiltersState({
-          groups: getGroups().map((g) => g.id),
-          statuses: DEFAULT_REVIEW_STATUSES,
-        });
+        resetLocalState();
+        setError(null);
         setLoading(false);
         return;
       }
+
       setLoading(true);
-      const [loadedStatuses, helpPref, studyPrefs, reviewPrefs] =
-        await Promise.all([
-          getStatuses(userId),
-          getHelpPreference(userId),
-          getStudyPreferences(userId),
-          getReviewFilters(userId),
-        ]);
-      if (!active) return;
-      setStatuses(loadedStatuses);
-      setHelpSeen(helpPref.seen);
-      setStudyPrefsState(studyPrefs);
-      setReviewFiltersState(reviewPrefs);
-      setLoading(false);
+      setError(null);
+      try {
+        const [loadedStatuses, helpPref, studyPrefs, reviewPrefs] =
+          await Promise.all([
+            getStatuses(userId),
+            getHelpPreference(userId),
+            getStudyPreferences(userId),
+            getReviewFilters(userId),
+          ]);
+        if (!active) return;
+        setStatuses(loadedStatuses);
+        setHelpSeen(helpPref.seen);
+        setStudyPrefsState(studyPrefs);
+        setReviewFiltersState(reviewPrefs);
+      } catch (nextError) {
+        if (!active) return;
+        console.warn("failed loading words state", nextError);
+        resetLocalState();
+        setError(toErrorMessage(nextError, "שגיאה בטעינת נתוני למידה"));
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
     })();
     return () => {
       active = false;
     };
-  }, [userId]);
+  }, [resetLocalState, userId]);
 
   const updateStatus = useCallback(
     async (wordId: string, status: WordStatus) => {
       if (!userId) return;
-      setStatuses((prev) => ({ ...prev, [wordId]: status }));
-      await setStatus(userId, wordId, status);
+      const previousStatuses = statuses;
+      setError(null);
+      setStatuses((prev) => {
+        const next = { ...prev };
+        if (status === "UNMARKED") {
+          delete next[wordId];
+        } else {
+          next[wordId] = status;
+        }
+        return next;
+      });
+      try {
+        await setStatus(userId, wordId, status);
+      } catch (nextError) {
+        console.warn("failed updating word status", nextError);
+        setStatuses(previousStatuses);
+        setError(toErrorMessage(nextError, "שמירת הסטטוס נכשלה"));
+      }
     },
-    [userId],
+    [statuses, userId],
   );
 
   const updateStudyPreferences = useCallback(
     async (prefs: StudyPreferences) => {
       if (!userId) return;
+      const previous = studyPreferences;
+      setError(null);
       setStudyPrefsState(prefs);
-      await setStudyPreferences(userId, prefs);
+      try {
+        await setStudyPreferences(userId, prefs);
+      } catch (nextError) {
+        console.warn("failed updating study preferences", nextError);
+        setStudyPrefsState(previous);
+        setError(toErrorMessage(nextError, "שמירת הגדרות למידה נכשלה"));
+      }
     },
-    [userId],
+    [studyPreferences, userId],
   );
 
   const updateReviewFilters = useCallback(
     async (filters: ReviewFilters) => {
       if (!userId) return;
+      const previous = reviewFilters;
+      setError(null);
       setReviewFiltersState(filters);
-      await setReviewFilters(userId, filters);
+      try {
+        await setReviewFilters(userId, filters);
+      } catch (nextError) {
+        console.warn("failed updating review filters", nextError);
+        setReviewFiltersState(previous);
+        setError(toErrorMessage(nextError, "שמירת סינון השינון נכשלה"));
+      }
     },
-    [userId],
+    [reviewFilters, userId],
   );
 
   const markHelpSeen = useCallback(async () => {
     if (!userId) return;
+    const previous = helpSeen;
+    setError(null);
     setHelpSeen(true);
-    await setHelpPreference(userId, { seen: true });
-  }, [userId]);
+    try {
+      await setHelpPreference(userId, { seen: true });
+    } catch (nextError) {
+      console.warn("failed updating help preference", nextError);
+      setHelpSeen(previous);
+      setError(toErrorMessage(nextError, "שמירת העדפת העזרה נכשלה"));
+    }
+  }, [helpSeen, userId]);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -152,6 +227,8 @@ export function WordProvider({ children }: PropsWithChildren) {
       helpSeen,
       markHelpSeen,
       loading,
+      error,
+      clearError,
     }),
     [
       statuses,
@@ -160,6 +237,8 @@ export function WordProvider({ children }: PropsWithChildren) {
       reviewFilters,
       helpSeen,
       loading,
+      error,
+      clearError,
       updateStatus,
       updateStudyPreferences,
       updateReviewFilters,

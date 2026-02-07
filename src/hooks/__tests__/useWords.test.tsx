@@ -67,6 +67,7 @@ describe("useWords", () => {
     expect(result.current.helpSeen).toBe(false);
     expect(result.current.studyPreferences.chunkSize).toBe(7);
     expect(result.current.reviewFilters.groups.length).toBe(repo.getGroups().length);
+    expect(result.current.error).toBeNull();
   });
 
   it("updates status, preferences, and help flag", async () => {
@@ -102,5 +103,36 @@ describe("useWords", () => {
 
     const missing = result.current.getWord("missing");
     expect(missing).toBeNull();
+  });
+
+  it("falls back to defaults when initial load fails", async () => {
+    repo.getStatuses.mockRejectedValueOnce(new Error("network down"));
+    const { result } = renderWords();
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.statuses).toEqual({});
+    expect(result.current.helpSeen).toBe(false);
+    expect(result.current.studyPreferences.chunkSize).toBe(7);
+    expect(result.current.reviewFilters.groups).toHaveLength(repo.getGroups().length);
+    expect(result.current.error).toBe("network down");
+
+    act(() => {
+      result.current.clearError();
+    });
+    expect(result.current.error).toBeNull();
+  });
+
+  it("rolls back optimistic status update when write fails", async () => {
+    repo.setStatus.mockRejectedValueOnce(new Error("write failed"));
+    const { result } = renderWords();
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.updateStatus("word-1", "UNMARKED");
+    });
+
+    expect(result.current.statuses).toEqual({ "word-1": "KNOW" });
+    expect(result.current.error).toBe("write failed");
   });
 });
