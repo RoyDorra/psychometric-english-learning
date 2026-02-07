@@ -8,12 +8,12 @@ import * as associationRepo from "@/src/repositories/associationRepo";
 jest.mock("../useAuth", () => {
   const React = jest.requireActual("react") as typeof import("react");
   const value = {
-    user: { id: "test-user", email: "test@example.com", passwordHash: "", createdAt: "" },
-    session: { user: { id: "test-user" }, token: "token" },
-    initializing: false,
-    login: jest.fn(),
-    register: jest.fn(),
-    logout: jest.fn(),
+    user: { id: "test-user", email: "test@example.com" },
+    session: { user: { id: "test-user" } },
+    isLoading: false,
+    signIn: jest.fn(),
+    signUp: jest.fn(),
+    signOut: jest.fn(),
   };
   const Ctx = React.createContext(value);
   const AuthProvider = ({ children }: { children: React.ReactNode }) => (

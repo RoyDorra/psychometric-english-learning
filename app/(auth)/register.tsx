@@ -11,7 +11,7 @@ import { spacing } from "@/src/ui/theme";
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { register } = useAuth();
+  const { signUp } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -42,7 +42,7 @@ export default function RegisterScreen() {
     try {
       setLoading(true);
       setError(null);
-      await register(email, password);
+      await signUp(email, password);
       router.replace("/(tabs)/words");
     } catch (err) {
       setError((err as Error).message || "שגיאה בהרשמה");

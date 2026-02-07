@@ -15,10 +15,10 @@ jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
 }));
 
-const mockLogout = jest.fn();
+const mockSignOut = jest.fn().mockResolvedValue(undefined);
 jest.mock("@/src/hooks/useAuth", () => ({
   useAuth: () => ({
-    logout: mockLogout,
+    signOut: mockSignOut,
   }),
 }));
 
@@ -40,7 +40,7 @@ describe("UI components", () => {
     jest.clearAllMocks();
   });
 
-  it("HeaderHelpButton opens menu and triggers navigation and logout", async () => {
+  it("HeaderHelpButton opens menu and triggers navigation and sign out", async () => {
     const push = jest.fn();
     const replace = jest.fn();
     (useRouter as jest.Mock).mockReturnValue({ push, replace });
@@ -65,7 +65,7 @@ describe("UI components", () => {
     });
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/(auth)/login"));
-    await waitFor(() => expect(mockLogout).toHaveBeenCalled());
+    await waitFor(() => expect(mockSignOut).toHaveBeenCalled());
     await waitFor(() => expect(queryByText("איך ללמוד?")).toBeNull());
 
     act(() => {

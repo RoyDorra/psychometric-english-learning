@@ -4,11 +4,11 @@ import { WordProvider, useWords } from "../useWords";
 jest.mock("../useAuth", () => ({
   useAuth: () => ({
     session: { user: { id: "user-1" } },
-    user: { id: "user-1", email: "test@example.com", passwordHash: "", createdAt: "" },
-    initializing: false,
-    login: jest.fn(),
-    register: jest.fn(),
-    logout: jest.fn(),
+    user: { id: "user-1", email: "test@example.com" },
+    isLoading: false,
+    signIn: jest.fn(),
+    signUp: jest.fn(),
+    signOut: jest.fn(),
   }),
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
 }));

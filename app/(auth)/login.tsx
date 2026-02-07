@@ -11,7 +11,7 @@ import { spacing } from "@/src/ui/theme";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export default function LoginScreen() {
     try {
       setLoading(true);
       setError(null);
-      await login(email, password);
+      await signIn(email, password);
       router.replace("/(tabs)/words");
     } catch (err) {
       setError((err as Error).message || "שגיאה בהתחברות");

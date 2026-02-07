@@ -14,7 +14,7 @@ import { colors, radius, spacing } from "@/src/ui/theme";
 
 export default function HeaderHelpButton() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
   const [visible, setVisible] = useState(false);
   const [loadingAction, setLoadingAction] = useState<"logout" | null>(null);
 
@@ -32,14 +32,14 @@ export default function HeaderHelpButton() {
         label: "התנתק",
         onPress: async () => {
           setLoadingAction("logout");
-          await logout();
+          await signOut();
           setLoadingAction(null);
           setVisible(false);
           router.replace("/(auth)/login");
         },
       },
     ],
-    [logout, router]
+    [router, signOut]
   );
 
   return (

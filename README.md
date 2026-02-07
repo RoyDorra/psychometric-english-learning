@@ -10,7 +10,19 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Start the app
+2. Configure Supabase Auth (required for login/register)
+
+   Create `.env.local` (gitignored) with:
+
+   ```bash
+   EXPO_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+   EXPO_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+   ```
+
+   Optional fallback: set `expo.extra.supabaseUrl` and `expo.extra.supabaseAnonKey` in app config.
+   Do not commit real keys to git.
+
+3. Start the app
 
    ```bash
    npx expo start

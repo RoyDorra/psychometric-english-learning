@@ -4,9 +4,9 @@ import { useAuth } from "@/src/hooks/useAuth";
 import { colors } from "@/src/ui/theme";
 
 export default function Index() {
-  const { session, initializing } = useAuth();
+  const { session, isLoading } = useAuth();
 
-  if (initializing) {
+  if (isLoading) {
     return (
       <View
         style={{

@@ -10,21 +10,21 @@ import HeaderHelpButton from "@/components/HeaderHelpButton";
 import { colors } from "@/src/ui/theme";
 
 function RootLayoutNav() {
-  const { session, initializing } = useAuth();
+  const { session, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const inAuthGroup = segments[0] === "(auth)";
 
   useEffect(() => {
-    if (initializing) return;
+    if (isLoading) return;
     if (!session && !inAuthGroup) {
       router.replace("/(auth)/login");
     } else if (session && inAuthGroup) {
       router.replace("/(tabs)/words");
     }
-  }, [session, inAuthGroup, initializing, router, segments]);
+  }, [session, inAuthGroup, isLoading, router, segments]);
 
-  if (initializing) {
+  if (isLoading) {
     return (
       <View
         style={{

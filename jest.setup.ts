@@ -2,6 +2,9 @@ import "@testing-library/jest-native/extend-expect";
 import "react-native-gesture-handler/jestSetup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+process.env.EXPO_PUBLIC_SUPABASE_URL ??= "https://example.supabase.co";
+process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??= "test-anon-key";
+
 jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
