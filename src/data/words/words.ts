@@ -15,7 +15,7 @@ export type Word = WordSource & {
   index: number;
 };
 
-const GROUP_SOURCES: ReadonlyArray<ReadonlyArray<WordSource>> = [
+const GROUP_SOURCES: readonly (readonly WordSource[])[] = [
   words1,
   words2,
   words3,

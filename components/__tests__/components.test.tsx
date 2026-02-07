@@ -2,6 +2,7 @@ import React from "react";
 import { act, render, fireEvent, waitFor } from "@testing-library/react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useRouter } from "expo-router";
 import HeaderHelpButton from "../HeaderHelpButton";
 import PrimaryButton from "../PrimaryButton";
 import TextField from "../TextField";
@@ -42,8 +43,7 @@ describe("UI components", () => {
   it("HeaderHelpButton opens menu and triggers navigation and logout", async () => {
     const push = jest.fn();
     const replace = jest.fn();
-    const useRouter = require("expo-router").useRouter as jest.Mock;
-    useRouter.mockReturnValue({ push, replace });
+    (useRouter as jest.Mock).mockReturnValue({ push, replace });
 
     const { getByText, queryByText } = render(<HeaderHelpButton />, { wrapper });
 

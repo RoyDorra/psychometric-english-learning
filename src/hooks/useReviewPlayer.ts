@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { GROUPS } from "../data/words";
 import { ReviewFilters, Word, WordStatus } from "../domain/types";
 
 type Options = {
@@ -7,17 +8,30 @@ type Options = {
   filters: ReviewFilters;
 };
 
+const GROUP_ID_TO_NUMBER = new Map(
+  GROUPS.map((group) => [group.id, group.order]),
+);
+
 export function useReviewPlayer({ words, statuses, filters }: Options) {
   const allowedGroups = useMemo(() => {
+    if (filters.groups.length === 0) {
+      return null;
+    }
+
     const set = new Set<number>();
     for (const id of filters.groups) {
       if (typeof id === "number") {
         set.add(id);
         continue;
       }
-      const match = String(id).match(/\d+/);
-      if (!match) continue;
-      const num = Number(match[0]);
+
+      const mapped = GROUP_ID_TO_NUMBER.get(id);
+      if (typeof mapped === "number") {
+        set.add(mapped);
+        continue;
+      }
+
+      const num = Number(id);
       if (Number.isFinite(num)) set.add(num);
     }
     return set;
@@ -25,7 +39,7 @@ export function useReviewPlayer({ words, statuses, filters }: Options) {
 
   const filtered = useMemo(() => {
     return words.filter((word) => {
-      if (!allowedGroups.has(word.group)) return false;
+      if (allowedGroups && !allowedGroups.has(word.group)) return false;
       const status = statuses[word.id] ?? "UNMARKED";
       return filters.statuses.includes(status);
     });
