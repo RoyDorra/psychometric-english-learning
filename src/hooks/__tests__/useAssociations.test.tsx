@@ -4,6 +4,12 @@ import { act, fireEvent, render, renderHook, waitFor } from "@testing-library/re
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AssociationsProvider, useAssociations } from "../useAssociations";
 import * as associationRepo from "@/src/repositories/associationRepo";
+import { resetMockSupabase } from "@/test/supabaseInMemory";
+
+jest.mock("@/src/services/supabase", () => {
+  const { mockSupabase } = require("@/test/supabaseInMemory");
+  return { supabase: mockSupabase };
+});
 
 jest.mock("../useAuth", () => {
   const React = jest.requireActual("react") as typeof import("react");
@@ -74,6 +80,7 @@ describe("useAssociations", () => {
   beforeEach(async () => {
     jest.useRealTimers();
     await (AsyncStorage as any).clear?.();
+    resetMockSupabase();
   });
 
   afterEach(() => {

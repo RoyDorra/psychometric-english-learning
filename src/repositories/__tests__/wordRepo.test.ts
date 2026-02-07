@@ -1,3 +1,8 @@
+jest.mock("@/src/services/supabase", () => {
+  const { mockSupabase } = require("@/test/supabaseInMemory");
+  return { supabase: mockSupabase };
+});
+
 import {
   DEFAULT_CHUNK_SIZE,
   getReviewFilters,
@@ -11,15 +16,15 @@ import {
   setStudyPreferences,
 } from "../wordRepo";
 import type { WordStatus } from "@/src/domain/types";
-import { createFakeStorage, installFakeStorage } from "@/test/fakeStorage";
+import {
+  queueMockError,
+  resetMockSupabase,
+  writeMockTable,
+} from "@/test/supabaseInMemory";
 
 describe("wordRepo", () => {
   beforeEach(() => {
-    installFakeStorage(createFakeStorage());
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
+    resetMockSupabase();
   });
 
   it("resolves group identifiers and returns matching words", () => {
@@ -40,15 +45,15 @@ describe("wordRepo", () => {
     expect(getWordById("does-not-exist")).toBeNull();
   });
 
-  it("stores statuses per user and returns clones", async () => {
+  it("stores statuses per user and keeps only non-default statuses", async () => {
     const userId = "user-a";
     await setStatus(userId, "word-1", "KNOW");
     const first = await getStatuses(userId);
     expect(first).toEqual({ "word-1": "KNOW" });
 
-    first["word-1"] = "UNMARKED";
+    await setStatus(userId, "word-1", "UNMARKED");
     const second = await getStatuses(userId);
-    expect(second["word-1"]).toBe("KNOW");
+    expect(second).toEqual({});
   });
 
   it("persists study preferences with sensible defaults", async () => {
@@ -71,5 +76,70 @@ describe("wordRepo", () => {
 
     expect(mine).toEqual({ groups: ["group-1"], statuses: ["KNOW"] });
     expect(theirs.groups).not.toEqual(mine.groups);
+  });
+
+  it("normalizes malformed persisted state and falls back to defaults", async () => {
+    writeMockTable("user_learning_state", [
+      {
+        user_id: "user-x",
+        state: {
+          v: 99,
+          s: { keep: "KNOW", dropA: "UNMARKED", dropB: "INVALID" },
+          sp: { c: -3, m: 0 },
+          rf: { g: 0, m: 0 },
+          h: "truthy",
+        },
+      },
+    ]);
+
+    const statuses = await getStatuses("user-x");
+    expect(statuses).toEqual({ keep: "KNOW" });
+
+    const study = await getStudyPreferences("user-x");
+    expect(study.chunkSize).toBe(DEFAULT_CHUNK_SIZE);
+    expect(study.statuses).toEqual(["UNMARKED", "DONT_KNOW", "PARTIAL"]);
+
+    const review = await getReviewFilters("user-x");
+    expect(review.groups).toHaveLength(10);
+    expect(review.statuses).toEqual(["UNMARKED", "DONT_KNOW", "PARTIAL", "KNOW"]);
+  });
+
+  it("accepts numeric group ids when storing review filters", async () => {
+    await setReviewFilters("user-y", {
+      groups: ["2", "not-a-group"],
+      statuses: ["KNOW"],
+    });
+    const review = await getReviewFilters("user-y");
+    expect(review.groups).toEqual(["group-2"]);
+    expect(review.statuses).toEqual(["KNOW"]);
+  });
+
+  it("throws repository errors when supabase operations fail", async () => {
+    queueMockError("user_learning_state", "select", { message: "select failed" });
+    await expect(getStatuses("user-z")).rejects.toMatchObject({
+      message: "select failed",
+    });
+
+    queueMockError("user_learning_state", "upsert", { message: "upsert failed" });
+    await expect(
+      setStatus("user-z", "word-1", "KNOW"),
+    ).rejects.toMatchObject({ message: "upsert failed" });
+  });
+
+  it("filters invalid statuses when setting study/review preferences", async () => {
+    await setStudyPreferences("user-v", {
+      chunkSize: 3,
+      statuses: ["INVALID" as unknown as WordStatus],
+    });
+    const study = await getStudyPreferences("user-v");
+    expect(study.statuses).toEqual(["UNMARKED", "DONT_KNOW", "PARTIAL"]);
+
+    await setReviewFilters("user-v", {
+      groups: [],
+      statuses: ["BAD" as unknown as WordStatus],
+    });
+    const review = await getReviewFilters("user-v");
+    expect(review.groups).toHaveLength(10);
+    expect(review.statuses).toEqual(["UNMARKED", "DONT_KNOW", "PARTIAL", "KNOW"]);
   });
 });

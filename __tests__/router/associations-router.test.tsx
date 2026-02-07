@@ -6,6 +6,12 @@ import {
 } from "expo-router/testing-library";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WORDS } from "@/src/data/words";
+import { resetMockSupabase } from "@/test/supabaseInMemory";
+
+jest.mock("@/src/services/supabase", () => {
+  const { mockSupabase } = require("@/test/supabaseInMemory");
+  return { supabase: mockSupabase };
+});
 
 jest.mock("@/src/hooks/useAuth", () => {
   const React = require("react");
@@ -38,6 +44,7 @@ const renderAssociations = () => {
 describe("WordAssociationsScreen (router)", () => {
   beforeEach(async () => {
     await (AsyncStorage as any).clear?.();
+    resetMockSupabase();
     jest.useRealTimers();
   });
 

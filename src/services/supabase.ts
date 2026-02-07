@@ -49,8 +49,9 @@ function createWebLocalStorageAdapter(): StorageAdapter {
 }
 
 function createNativeAsyncStorageAdapter(): StorageAdapter {
-  const AsyncStorage = require("@react-native-async-storage/async-storage")
-    .default as StorageAdapter;
+  const asyncStorageModule = require("@react-native-async-storage/async-storage");
+  const AsyncStorage = (asyncStorageModule?.default ??
+    asyncStorageModule) as StorageAdapter;
   return {
     getItem: AsyncStorage.getItem.bind(AsyncStorage),
     setItem: AsyncStorage.setItem.bind(AsyncStorage),
