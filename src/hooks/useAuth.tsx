@@ -26,19 +26,30 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
+    let active = true;
     (async () => {
-      await bootstrap();
-      const existingSession = await getSession();
-      const existingUserId = existingSession?.user?.id;
-      if (existingUserId) {
-        const existingUser = await getUserById(existingUserId);
-        if (existingUser) {
-          setSession(existingSession);
-          setUser(existingUser);
+      try {
+        await bootstrap();
+        const existingSession = await getSession();
+        const existingUserId = existingSession?.user?.id;
+        if (!active) return;
+        if (existingUserId) {
+          const existingUser = await getUserById(existingUserId);
+          if (!active) return;
+          if (existingUser) {
+            setSession(existingSession);
+            setUser(existingUser);
+          }
+        }
+      } finally {
+        if (active) {
+          setInitializing(false);
         }
       }
-      setInitializing(false);
     })();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const login = async (email: string, password: string) => {

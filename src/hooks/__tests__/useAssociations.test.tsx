@@ -6,7 +6,7 @@ import { AssociationsProvider, useAssociations } from "../useAssociations";
 import * as associationRepo from "@/src/repositories/associationRepo";
 
 jest.mock("../useAuth", () => {
-  const React = require("react");
+  const React = jest.requireActual("react") as typeof import("react");
   const value = {
     user: { id: "test-user", email: "test@example.com", passwordHash: "", createdAt: "" },
     session: { user: { id: "test-user" }, token: "token" },

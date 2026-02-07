@@ -50,6 +50,7 @@ app-example
 # generated reports
 scripts/*_report.json
 scripts/*.log
+coverage/
 
 # env
 .env

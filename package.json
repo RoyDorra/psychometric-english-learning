@@ -15,8 +15,11 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest --watch",
+    "test:fast": "jest --runInBand",
     "test:ci": "jest --ci --coverage --runInBand",
     "test:changed": "jest --watch --onlyChanged",
+    "check:local": "npm run lint && npx tsc -p tsconfig.json --noEmit && npm run test:fast",
+    "check:full": "npm run lint && npx tsc -p tsconfig.json --noEmit && npm run test:ci",
     "words:assign-uuids:build": "tsc -p scripts/tsconfig.json",
     "words:assign-uuids": "npm run words:assign-uuids:build && node scripts/dist/assign_word_uuids.js"
   },

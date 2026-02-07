@@ -43,7 +43,7 @@ const AssociationsContext = createContext<AssociationsContextValue | undefined>(
 
 export function AssociationsProvider({ children }: PropsWithChildren) {
   const { session } = useAuth();
-  const userId = session?.user.id ?? "guest";
+  const userId = session?.user.id ?? null;
   const [publicLists, setPublicLists] = useState<
     Record<string, PublicAssociationView[]>
   >({});
@@ -65,6 +65,10 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
 
   const refresh = useCallback(
     async (wordId?: string) => {
+      if (!userId) {
+        return;
+      }
+
       const targets = wordId
         ? [wordId]
         : Array.from(trackedWordIdsRef.current);
@@ -122,6 +126,7 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
 
   const addPublic = useCallback(
     async (wordId: string, textHe: string) => {
+      if (!userId) return;
       await createPublicAssociation(wordId, textHe.trim(), userId);
       await refresh(wordId);
     },
@@ -130,6 +135,7 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
 
   const addPrivate = useCallback(
     async (wordId: string, textHe: string) => {
+      if (!userId) return;
       await createPrivateAssociation(wordId, textHe.trim(), userId);
       await refresh(wordId);
     },
@@ -138,6 +144,7 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
 
   const toggleLike = useCallback(
     async (wordId: string, associationId: string) => {
+      if (!userId) return;
       await toggleLikeRepo(associationId, userId);
       await refresh(wordId);
     },
@@ -146,6 +153,7 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
 
   const toggleSave = useCallback(
     async (wordId: string, associationId: string) => {
+      if (!userId) return;
       await toggleSaveRepo(associationId, userId);
       await refresh(wordId);
     },
@@ -154,6 +162,7 @@ export function AssociationsProvider({ children }: PropsWithChildren) {
 
   const deletePrivate = useCallback(
     async (wordId: string, associationId: string) => {
+      if (!userId) return;
       await deletePrivateAssociation(associationId, wordId, userId);
       await refresh(wordId);
     },
@@ -201,7 +210,9 @@ export function useAssociations(wordId?: string) {
 
   useEffect(() => {
     if (wordId) {
-      refresh(wordId);
+      void refresh(wordId).catch((error) => {
+        console.warn("failed refreshing associations", error);
+      });
     }
   }, [refresh, wordId]);
 
