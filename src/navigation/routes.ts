@@ -1,7 +1,6 @@
 import type { Href } from "expo-router";
 
 const WORDS_BASE = "/(tabs)/words";
-const WORD_BASE = "/word";
 const STUDY_BASE = "/(tabs)/study";
 const REVIEW_BASE = "/(tabs)/review";
 
@@ -10,7 +9,10 @@ export function wordsIndex(): Href {
 }
 
 export function wordsGroup(groupId: string | number): Href {
-  return `${WORDS_BASE}/${groupId}` as Href;
+  return {
+    pathname: "/(tabs)/words/[groupId]",
+    params: { groupId: String(groupId) },
+  } as Href;
 }
 
 export function studyIndex(): Href {
@@ -18,7 +20,10 @@ export function studyIndex(): Href {
 }
 
 export function studySetup(groupId: string | number): Href {
-  return `${STUDY_BASE}/${groupId}/setup` as Href;
+  return {
+    pathname: "/(tabs)/study/[groupId]/setup",
+    params: { groupId: String(groupId) },
+  } as Href;
 }
 
 export function reviewIndex(): Href {
@@ -26,9 +31,15 @@ export function reviewIndex(): Href {
 }
 
 export function wordDetails(wordId: string | number): Href {
-  return `${WORD_BASE}/${wordId}` as Href;
+  return {
+    pathname: "/word/[wordId]",
+    params: { wordId: String(wordId) },
+  } as Href;
 }
 
 export function wordAssociations(wordId: string | number): Href {
-  return `${WORD_BASE}/${wordId}/associations` as Href;
+  return {
+    pathname: "/word/[wordId]/associations",
+    params: { wordId: String(wordId) },
+  } as Href;
 }

@@ -47,4 +47,33 @@ describe("useReviewPlayer", () => {
     act(() => result.current.resetIndex());
     expect(result.current.list).toHaveLength(0);
   });
+
+  it("treats empty group filters as all groups", () => {
+    const { result } = renderHook(() =>
+      useReviewPlayer({
+        words,
+        statuses,
+        filters: { groups: [], statuses: ["KNOW", "DONT_KNOW"] },
+      }),
+    );
+
+    expect(result.current.total).toBe(2);
+    expect(result.current.list.map((word) => word.id)).toEqual([
+      "word-a",
+      "word-b",
+    ]);
+  });
+
+  it("does not infer group numbers from arbitrary strings with digits", () => {
+    const { result } = renderHook(() =>
+      useReviewPlayer({
+        words,
+        statuses,
+        filters: { groups: ["custom2slug"], statuses: ["DONT_KNOW"] },
+      }),
+    );
+
+    expect(result.current.total).toBe(0);
+    expect(result.current.current).toBeNull();
+  });
 });

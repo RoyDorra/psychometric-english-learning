@@ -50,6 +50,7 @@ app-example
 # generated reports
 scripts/*_report.json
 scripts/*.log
+coverage/
 
 # env
 .env
@@ -60,3 +61,7 @@ docs/codex/
 
 # Editor swap files
 *.swp
+
+# local agent/codex tooling (skills)
+.agents/
+.codex/
