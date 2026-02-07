@@ -57,7 +57,8 @@ coverage/
 .env.*
 
 # Codex action summaries (generated)
-docs/codex/
+docs/codex/_last_run_summary.md
+
 
 # Editor swap files
 *.swp

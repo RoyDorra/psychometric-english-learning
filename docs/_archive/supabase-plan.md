@@ -1,3 +1,4 @@
+# ARCHIVED: Not canonical. Kept for historical context only.
 # Supabase Plan
 
 ## Current scope
