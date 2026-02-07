@@ -1,5 +1,10 @@
 # ADR 0002: AsyncStorage as local cache/outbox (no local DB yet)
 
+## Implementation status (current repo)
+- Supabase Auth is active in runtime.
+- Feature data repositories are still AsyncStorage-backed today.
+- This ADR defines the local-cache strategy during the Supabase data cutover phase.
+
 ## Context
 - Word catalog is static/local in the app bundle.
 - Per-user data (progress, associations, future outbox items) is relatively small today.

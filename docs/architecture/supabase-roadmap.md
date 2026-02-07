@@ -2,22 +2,26 @@
 
 ## Current State (From Repo Scan)
 What exists:
-- Auth is local-only (`src/repositories/userRepo.ts`) using AsyncStorage + local password hashing.
-- User data is local-only in AsyncStorage repositories:
+- Supabase Auth is wired in runtime:
+  - client + platform storage adapter (`src/services/supabase.ts`)
+  - auth provider/session listener (`src/hooks/useAuth.tsx`)
+- User feature data is still local-only in AsyncStorage repositories:
   - Word statuses and preferences (`src/repositories/wordRepo.ts`)
   - Public/private associations + likes/saves (`src/repositories/associationRepo.ts`)
 - Architecture is already layered (providers -> hooks -> repositories), which is good for backend swap.
-- Decisions already documented: no `profiles` table yet, AsyncStorage remains local cache/outbox for now.
+- Decisions already documented: no `profiles` table yet, AsyncStorage is temporary local cache/outbox.
 
 What is missing for production-grade Supabase:
-- No Supabase auth wiring in app runtime.
-- No tracked `supabase/` migration workflow in repo.
-- No canonical phase gate from local-only to Supabase source of truth.
-- No final RLS policy set for user-owned feature tables.
+- No migration SQL files in `supabase/migrations/` yet (only scaffolding is present).
+- No applied schema/RLS artifacts tracked in this repository.
+- `wordRepo` and `associationRepo` are not yet Supabase-backed.
+- Legacy local auth repo (`src/repositories/userRepo.ts`) is still present and tested, but not used by runtime auth.
 
 ## Phase Plan
 
 ### Phase 1: Supabase Auth (replace local auth)
+Status: Completed
+
 Scope:
 - Replace local register/login/session store with Supabase Auth session flow.
 - Keep current app routes/providers shape as much as possible.
@@ -32,6 +36,8 @@ Exit criteria:
 - No AsyncStorage-based password/user table dependency for auth.
 
 ### Phase 2: DB schema + RLS + migrations
+Status: In progress
+
 Scope:
 - Create minimal relational schema for current features only.
 - Add RLS policies and indexes from day 1.
@@ -99,12 +105,15 @@ Exit criteria:
 - Manual apply instructions validated in SQL Editor.
 
 ### Phase 3: Repository refactor to Supabase
+Status: Not started
+
 Scope:
 - Swap AsyncStorage-backed repositories to Supabase-backed repositories.
 - Keep hooks/screens contracts stable where possible.
 
 Deliverables:
-- `userRepo`, `wordRepo`, `associationRepo` read/write via Supabase.
+- `wordRepo` and `associationRepo` read/write via Supabase tables.
+- Runtime no longer depends on local-only `userRepo` for auth behavior.
 - Error handling surfaced to hooks/UI for network failures.
 - Local cache remains optional and non-authoritative.
 
@@ -113,6 +122,8 @@ Exit criteria:
 - Per-user data isolation verified against RLS.
 
 ### Phase 4: Optional local cache/outbox + sync strategy (only if needed)
+Status: Deferred until justified
+
 Scope:
 - Add local outbox/cache only when concrete pain appears.
 
