@@ -73,3 +73,9 @@ docs/codex/_last_run_summary.md
 # local agent/codex tooling (skills)
 .agents/
 .codex/
+
+# Local secrets (never commit)
+secrets.supabase.local
+secrets.supabase.cli.local
+
+secrets.supabase.db.local
